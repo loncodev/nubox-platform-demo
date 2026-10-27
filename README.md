@@ -15,7 +15,7 @@ Abrir `index.html` en cualquier navegador moderno. No necesita backend ni creden
 - **Cambiar contraseña Nubox:** «Seguridad» → «Cambiar contraseña» → revalidación ficticia MFA → confirmación y revocación simulada de sesiones.
 - **Cambiar correo:** «Seguridad» → «Cambiar correo de ingreso» → código ficticio MFA **482915** → verificación del nuevo correo con código **742618** → confirmación. Conserva identidad, empresas y autorizaciones.
 - **Excepciones:** «Recuperar acceso» permite mostrar los escenarios de correo inaccesible, dispositivo MFA perdido y contraseña Nubox olvidada. Su tratamiento propone verificación asistida; no simula accesos sin validar la identidad.
-- **Visión futura:** catálogo y contratación simulada, suscripciones, documentos de cobro y usuarios por empresa. No forman parte del primer proyecto.
+- **Visión futura:** catálogo y contratación simulada, suscripciones, documentos de cobro y usuarios por empresa. Dentro de **Usuarios y accesos**, cada perfil muestra nombre, correo, rol, estado y empresa. Las opciones de restablecer contraseña y solicitar cambio de correo requieren confirmación del titular: el administrador no recibe credenciales ni modifica el correo unilateralmente. No se envían correos ni se cambia ninguna identidad real. No forman parte del primer proyecto.
 
 
 ## Seguridad y alcance
