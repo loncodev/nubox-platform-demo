@@ -47,8 +47,7 @@ const companies=[{name:'Comercial Andes SpA',rut:'76.348.950-2',products:['FA','
 const productInfo={FA:{name:'Factura y Administración',color:'#ff6235'},CO:{name:'Contabilidad',color:'#20d55f'},RE:{name:'Remuneraciones',color:'#7b80c5'},PO:{name:'Portal de Colaboradores',color:'#347aff'},CA:{name:'Control de Asistencia',color:'#c9b2df'}};
 const icons={home:'<svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10H3z"/><path d="M9 20v-7h6v7"/></svg>',apps:'<svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>',users:'<svg viewBox="0 0 24 24"><circle cx="9" cy="7" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3"/><path d="M18 8a3 3 0 0 1 0 6M17 17a5 5 0 0 1 4 4"/></svg>',shield:'<svg viewBox="0 0 24 24"><path d="m12 2 8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/><path d="m8 12 3 3 5-6"/></svg>',credit:'<svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>'};
 const escape=s=>String(s||'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
-const extra=window.NuboxExtras({state,companies,productInfo,shell,escape,setScreen,toast,help});
-const identity=window.NuboxIdentity({state,escape,aside,wrap,shell,setScreen,toast,help});
+
 
 const HELP_TEXT={
  why:'Nubox propone avanzar hacia un acceso común a sus cinco productos. Usar correo como identificador simplifica el ingreso, pero la protección proviene del segundo factor y de los controles de seguridad, no del correo por sí solo.',
@@ -84,6 +83,8 @@ document.addEventListener('click',event=>{
  }else if(!event.target.closest('.help-popover'))closeHelp();
 });
 document.addEventListener('keydown',event=>{if(event.key==='Escape'){closeHelp();if(document.activeElement?.classList?.contains('help-trigger'))document.activeElement.blur();}});
+const extra=window.NuboxExtras({state,companies,productInfo,shell,escape,setScreen,toast,help});
+const identity=window.NuboxIdentity({state,escape,aside,wrap,shell,setScreen,toast,help});
 function brand(light=false){return `<div class="brand ${light?'light':''}">nubox</div>`}
 function aside(kicker,head,desc){return `<aside class="auth-aside"><div>${brand(true)}</div><div><div class="aside-kicker">PLATAFORMA NUBOX · ${kicker}</div><h1>${head}</h1><p>${desc}</p><div class="mini-products">${Object.keys(productInfo).map(s=>`<span>${s}</span>`).join('')}</div></div><div class="aside-bottom">Una cuenta · Tus empresas · Todos tus productos</div></aside>`}
 function wrap(authAside,content){return `<div class="auth-shell">${authAside}<section class="auth-main"><div class="auth-card">${brand()}${content}</div></section></div>`}
