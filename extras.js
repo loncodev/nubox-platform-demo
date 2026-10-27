@@ -19,8 +19,71 @@ window.NuboxExtras=function(api){
  '<div class="panel"><h3>FAC-DEMO-'+(1403-invoiceIndex)+' <span class="pill neutral">Ejemplo</span></h3><div class="settings-row"><span>Período</span><strong>'+['Octubre','Septiembre','Agosto'][invoiceIndex]+' de 2026</strong></div><div class="settings-row"><span>Importe ilustrativo</span><strong>$64.000 CLP</strong></div><div class="settings-row"><span>Documento tributario</span><strong>No disponible</strong></div><p>En producción este detalle enlazaría el comprobante real y su estado en el sistema de facturación.</p><button class="btn-inline" data-action="page" data-page="billing">← Volver al historial</button></div>')}
  function payment(){return frame('Facturación · Medio de pago','Actualizar medio de pago',
  '<div class="panel"><h3>Actualizar forma de pago</h3><div class="info">Elige una opción de prueba; no ingreses datos bancarios reales.</div><div class="extra-actions"><button class="btn-inline primary-inline" data-action="extra-method" data-value="Tarjeta de prueba •• 1111">Tarjeta de prueba ••1111</button><button class="btn-inline" data-action="extra-method" data-value="Transferencia de prueba">Transferencia de prueba</button><button class="btn-inline" data-action="page" data-page="billing">Cancelar</button></div></div>')}
- function members(){const i=state.company,role=roles[i]||'Colaborador',isActive=enabled[i]!==false;return frame('Mi empresa · Equipo','Usuarios y accesos',
- '<div class="info">'+intro+' Gestiona los usuarios asociados a esta empresa.</div><div class="panel"><h3>Mi equipo</h3><div class="settings-row"><span>Andrés Rojas <small class="tiny">Administrador principal</small></span><strong>Administrador</strong><span class="pill">Activo</span></div><div class="settings-row"><span>Camila Soto <small class="tiny">Contabilidad</small></span><strong>'+role+'</strong><span class="pill neutral">'+(isActive?'Activo':'Inactivo')+'</span></div><div class="extra-actions"><button class="btn-inline" data-action="extra-role">Cambiar rol de Camila</button><button class="btn-inline" data-action="extra-toggle">'+(isActive?'Desactivar':'Reactivar')+' usuaria</button></div>'+(invited[i]?'<div class="settings-row"><span>Paula Fernández</span><strong>Colaborador</strong><span class="pill neutral">Invitada</span></div>':'<button class="btn-inline primary-inline" style="margin-top:18px" data-action="extra-invite">Invitar usuario</button>')+'</div><div class="devbox"><strong>Por validar:</strong> jerarquía estudio–Pymes, permisos por producto, aprobaciones y trazabilidad con los cinco equipos. No son parte del alcance del P0.</div>')}
+
+ let selectedUser='camila',passwordRequests={},emailRequests={};
+ function memberKey(id){return String(state.company)+':'+id}
+ function memberData(id){
+  const isCamila=id==='camila',isMe=id==='me',i=state.company;
+  const email=isMe?state.email:isCamila?'camila.soto@ejemplo.cl':'paula.fernandez@ejemplo.cl';
+  return {id,name:isMe?'Andrés Rojas':isCamila?'Camila Soto':'Paula Fernández',email,
+   role:isMe?'Administrador':isCamila?(roles[i]||'Contabilidad'):'Colaborador',
+   status:isMe?'Activo':isCamila?(enabled[i]!==false?'Activo':'Inactivo'):'Invitada'};
+ }
+ function memberRow(id){
+   const u=memberData(id);
+   return '<div class="member-directory-row"><div class="member-directory-person"><div class="member-initial">'+escape(u.name[0])+'</div><div><strong>'+escape(u.name)+'</strong><span>'+escape(u.email)+'</span></div></div><div class="member-directory-meta"><span class="pill neutral">'+escape(u.role)+'</span><span class="pill '+(u.status==='Activo'?'':'neutral')+'">'+escape(u.status)+'</span></div><button class="btn-inline" data-action="extra-profile" data-user="'+u.id+'">Ver perfil →</button></div>';
+ }
+ function members(){
+  return frame('Mi empresa · Equipo','Usuarios y accesos',
+   '<div class="panel"><div class="member-directory-heading"><div><h3>Equipo de la empresa</h3><p>Consulta los perfiles y administra accesos.</p></div><button class="btn-inline primary-inline" data-action="extra-invite" '+(invited[state.company]?'disabled':'')+'>'+(invited[state.company]?'Invitación registrada':'Invitar usuario')+'</button></div>'+
+   memberRow('me')+memberRow('camila')+(invited[state.company]?memberRow('paula'):'')+
+   '<p class="tiny" style="margin-top:16px">Los cambios de credenciales los confirma cada usuario. '+help('permissions','Sobre los accesos y permisos')+'</p></div>');
+ }
+ function memberProfile(){
+  const u=memberData(selectedUser),me=u.id==='me';
+  const requestReset=passwordRequests[memberKey(u.id)], requestEmail=emailRequests[memberKey(u.id)];
+  const accountPanel='<div class="panel"><h3>Información del usuario</h3>'+
+   '<div class="settings-row"><span>Nombre</span><strong>'+escape(u.name)+'</strong></div>'+
+   '<div class="settings-row"><span>Correo electrónico</span><strong>'+escape(u.email)+'</strong></div>'+
+   '<div class="settings-row"><span>Perfil / rol</span><strong>'+escape(u.role)+'</strong></div>'+
+   '<div class="settings-row"><span>Estado</span><span class="pill '+(u.status==='Activo'?'':'neutral')+'">'+escape(u.status)+'</span></div>'+
+   '<div class="settings-row"><span>Empresa</span><strong>'+escape(companies[state.company].name)+'</strong></div></div>';
+  const controls=me
+   ? '<button class="btn-inline primary-inline" data-action="changePassword">Cambiar mi contraseña</button><button class="btn-inline" data-action="changeEmail">Cambiar mi correo</button>'
+   : '<button class="btn-inline primary-inline" data-action="extra-start-reset">Restablecer contraseña</button><button class="btn-inline" data-action="extra-start-email">Cambiar correo</button>'+
+     (selectedUser==='camila'?'<button class="btn-inline" data-action="extra-role">Cambiar rol</button><button class="btn-inline" data-action="extra-toggle">'+(u.status==='Activo'?'Desactivar':'Reactivar')+' acceso</button>':'');
+  return frame('Usuarios · Perfil','Perfil de '+escape(u.name),
+   '<button class="linkbtn" data-action="page" data-page="members">← Volver a usuarios</button>'+
+   accountPanel+'<div class="panel"><h3>Seguridad y acceso '+help('recovery','Sobre las verificaciones de seguridad')+'</h3>'+
+   '<p>'+(me?'Administra las credenciales de tu cuenta.':'Como administrador puedes solicitar cambios, pero no definir credenciales de otra persona.')+'</p>'+
+   '<div class="extra-actions">'+controls+'</div>'+
+   (requestReset?'<p class="member-request-state">Restablecimiento solicitado · Pendiente de acción del usuario.</p>':'')+
+   (requestEmail?'<p class="member-request-state">Cambio de correo solicitado · Verificación pendiente de la persona titular.</p>':'')+
+   '</div>');
+ }
+ function memberReset(){
+  const u=memberData(selectedUser);if(u.id==='me')return memberProfile();
+  return frame('Usuarios · Credenciales','Restablecer contraseña',
+   '<button class="linkbtn" data-action="extra-profile" data-user="'+u.id+'">← Volver al perfil</button>'+
+   '<div class="panel"><h3>'+escape(u.name)+'</h3>'+
+   '<div class="settings-row"><span>Correo registrado</span><strong>'+escape(u.email)+'</strong></div>'+
+   '<p>Se enviaría al usuario un enlace de restablecimiento. Solo él puede crear una contraseña nueva tras comprobar su identidad.</p>'+
+   '<div class="info">Esta acción es ilustrativa: no se enviará ningún correo.</div>'+
+   '<div class="extra-actions"><button class="btn-inline primary-inline" data-action="extra-confirm-reset">Solicitar restablecimiento</button><button class="btn-inline" data-action="extra-profile" data-user="'+u.id+'">Cancelar</button></div></div>');
+ }
+ function memberEmail(){
+  const u=memberData(selectedUser);if(u.id==='me')return memberProfile();
+  const proposed=u.id==='camila'?'camila.nueva@ejemplo.cl':'paula.nueva@ejemplo.cl';
+  return frame('Usuarios · Identidad','Solicitar cambio de correo',
+   '<button class="linkbtn" data-action="extra-profile" data-user="'+u.id+'">← Volver al perfil</button>'+
+   '<div class="panel"><h3>'+escape(u.name)+'</h3>'+
+   '<div class="settings-row"><span>Correo actual</span><strong>'+escape(u.email)+'</strong></div>'+
+   '<div class="settings-row"><span>Correo propuesto (ejemplo)</span><strong>'+escape(proposed)+'</strong></div>'+
+   '<p>Se solicitará al titular comprobar su identidad y verificar el nuevo correo. Sus empresas y permisos se mantienen. '+help('emailchange','Por qué debe verificarlo el usuario')+'</p>'+
+   '<div class="info">Solicitud de ejemplo: no cambiaremos ninguna cuenta ni enviaremos mensajes.</div>'+
+   '<div class="extra-actions"><button class="btn-inline primary-inline" data-action="extra-confirm-email">Solicitar verificación</button><button class="btn-inline" data-action="extra-profile" data-user="'+u.id+'">Cancelar</button></div></div>');
+ }
+
  function handle(a,el){
  if(a==='extra-offer'){offerCode=el.dataset.code||'CA';setScreen(active(offerCode)?'subscriptions':'offer')}
  else if(a==='extra-buy'){if(!document.getElementById('extraAgree')?.checked){toast('Confirma primero que la operación es simulada.')}else{(purchased[state.company]||(purchased[state.company]=[])).push(offerCode);setScreen('subscriptions');toast('Producto agregado a tus suscripciones.')}}
@@ -28,12 +91,17 @@ window.NuboxExtras=function(api){
  else if(a==='extra-payment')setScreen('payment')
  else if(a==='extra-method'){methods[state.company]=el.dataset.value;setScreen('billing');toast('Medio de pago actualizado.')}
  else if(a==='extra-retry'){retried[state.company]=true;setScreen('billing');toast('Solicitud de reintento registrada. No se procesó ningún pago.')}
+ else if(a==='extra-profile'){selectedUser=['me','camila','paula'].includes(el.dataset.user)?el.dataset.user:'me';setScreen('memberProfile')}
+ else if(a==='extra-start-reset'){if(selectedUser==='me')setScreen('security');else setScreen('memberReset')}
+ else if(a==='extra-start-email'){if(selectedUser==='me')setScreen('security');else setScreen('memberEmail')}
+ else if(a==='extra-confirm-reset'){passwordRequests[memberKey(selectedUser)]=true;setScreen('memberProfile');toast('Solicitud de restablecimiento registrada. No se envió ningún correo.')}
+ else if(a==='extra-confirm-email'){emailRequests[memberKey(selectedUser)]=true;setScreen('memberProfile');toast('Solicitud de cambio registrada. Falta verificación del titular.')}
  else if(a==='extra-invite'){invited[state.company]=true;setScreen('members');toast('Invitación registrada en esta sesión.')}
- else if(a==='extra-role'){roles[state.company]=roles[state.company]==='Colaborador'?'Contabilidad':'Colaborador';setScreen('members')}
- else if(a==='extra-toggle'){enabled[state.company]=enabled[state.company]===false;setScreen('members')}
+ else if(a==='extra-role'){roles[state.company]=roles[state.company]==='Contabilidad'?'Colaborador':'Contabilidad';setScreen('memberProfile')}
+ else if(a==='extra-toggle'){enabled[state.company]=enabled[state.company]===false;setScreen('memberProfile')}
  else return false;
  return true;
  }
- function reset(){purchased={};invited={};roles={};enabled={};methods={};retried={};offerCode='CA';invoiceIndex=0}
- return {active,handle,reset,screens:{catalog,subscriptions,offer,billing,invoice,payment,members}};
+ function reset(){purchased={};invited={};roles={};enabled={};methods={};retried={};offerCode='CA';invoiceIndex=0;selectedUser='camila';passwordRequests={};emailRequests={}}
+ return {active,handle,reset,screens:{catalog,subscriptions,offer,billing,invoice,payment,members,memberProfile,memberReset,memberEmail}};
 };
