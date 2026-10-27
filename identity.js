@@ -2,16 +2,24 @@
 window.NuboxIdentity=function(api){
   const {state,escape,aside,wrap,shell,setScreen,toast,help}=api;
   const demoMfa='482915',demoEmail='742618';
-  const deadline='15 de febrero de 2027';
+  const deadline='por confirmar para tu cohorte';
   function smallNote(){return ''}
   function header(eyebrow,title,subtitle,content){const k=title==='Cambiar correo de acceso'?'emailchange':title==='Verifica tu nuevo correo'?'emailcode':title==='Comprueba que eres tú'?'mfa':null;return shell('<div class="page"><div class="eyebrow">'+eyebrow+'</div><h1>'+title+(k?' '+help(k,'Más información sobre este paso'):'')+'</h1><p class="sub">'+subtitle+'</p>'+content+smallNote()+'</div>')}
   function migrationInfo(){return wrap(
-    aside('Transición','Una cuenta, todas tus soluciones.','Te acompañamos en el cambio: un correo verificado, un acceso común y una experiencia de plataforma más consistente.'),
-    '<h2>Estamos renovando tu ingreso '+help('why','¿Por qué cambia el ingreso?')+'</h2><p class="lead">Un solo acceso para tus empresas y productos, con más protección.</p>'+
-    '<div class="cutoff"><strong>Fecha ilustrativa: '+deadline+' '+help('deadline','Sobre la fecha de corte')+'</strong><span>Nubox comunicará la fecha definitiva a cada grupo de clientes.</span></div>'+
-    '<div class="panel"><h3>¿Qué cambia?</h3><p>Ingresarás con tu correo verificado y un segundo factor de seguridad.</p><h3>¿Qué se mantiene?</h3><p>Tus empresas, productos y permisos vinculados a tu identidad.</p><h3>¿Qué debes hacer?</h3><p>Verificar tu correo y activar el segundo factor antes de la fecha comunicada.</p></div>'+
+    aside('Transición','Actualizamos tu forma de ingresar.','Nubox ya gestiona tus accesos. Verificaremos el correo y activaremos MFA sin modificar esos permisos.'),
+    '<h2>Estamos renovando tu ingreso '+help('why','¿Por qué cambia el ingreso?')+'</h2><p class="lead">Prepararemos los datos de todos, pero cada usuario confirma su migración de forma segura.</p>'+
+    '<div class="cutoff"><strong>Fecha de corte: '+deadline+' '+help('deadline','Sobre la fecha de corte')+'</strong><span>Cada grupo tendrá un plazo comunicado con anticipación.</span></div>'+
+    '<div class="panel"><h3>¿Qué cambia?</h3><p>El RUT deja de utilizarse para ingresar. Necesitarás un correo individual verificado y MFA.</p><h3>¿Qué se mantiene?</h3><p>Tu ID de usuario, el RUT registrado y los permisos que gestiona Perfilamento.</p><h3>¿Qué debes hacer?</h3><p>Validar que controlas la cuenta actual, verificar el correo y configurar MFA. Si compartes correo con otra cuenta, deberás elegir uno individual.</p></div>'+
     '<button class="action" data-action="rut">Actualizar mi ingreso desde RUT</button><button class="action secondary" data-action="login">Ya ingreso con correo</button>'+
     ''
+  )}
+  function migrationConflict(){return wrap(
+    aside('Correo compartido','Una cuenta por persona.','No fusionamos identidades ni cambiamos permisos automáticamente cuando un correo aparece en varios usuarios.'),
+    '<h2>Este correo ya se utiliza en otra cuenta</h2><p class="lead">El correo de contacto <strong>'+escape(state.migrationEmail||'contacto@empresa.cl')+'</strong> está asociado a otra identidad en este ejemplo.</p>'+
+    '<div class="panel"><h3>¿Cómo continuar?</h3><p>Utiliza un correo individual al que tengas acceso. Conservaremos tu ID, tus empresas y tus permisos de Perfilamento.</p>'+
+    '<button class="action" data-action="demoIndividualEmail">Usar correo individual de ejemplo</button>'+
+    '<button class="action secondary" data-action="lostEmail">No tengo otro correo disponible</button></div>'+
+    '<p class="tiny">Caso ilustrativo: la detección real de duplicados requiere consultar y preparar la base de usuarios.</p>'
   )}
   function enrollMfa(){return wrap(
     aside('Primer ingreso','Activa tu protección adicional.','La primera vez configuramos un factor independiente del correo. En los accesos posteriores solo lo verificamos.'),
@@ -63,7 +71,7 @@ window.NuboxIdentity=function(api){
   function lostPassword(){return recoverDetails('password')}
   function ownership(){return wrap(
     aside('Migración','Validamos antes de vincular.','RUT y correo nuevo son datos declarativos; verificar el buzón no prueba que seas titular de la cuenta antigua.'),
-    '<h2>Confirma tu identidad anterior '+help('migration','Por qué verificamos la cuenta original')+'</h2><p class="lead">Has verificado el nuevo correo <strong>'+escape(state.email)+'</strong>.</p>'+
+    '<h2>Confirma tu identidad anterior '+help('migration','Por qué verificamos la cuenta original')+'</h2><p class="lead">Has verificado el nuevo correo <strong>'+escape(state.migrationEmail||state.email)+'</strong>.</p>'+
     '<div class="alert-compact"><strong>Paso obligatorio en producción:</strong> comprobar que la persona controla la cuenta original mediante la autenticación existente o una revisión asistida.</div>'+
     '<div class="panel"><h3>Verificación de identidad</h3><p>Confirma el control de tu cuenta anterior para mantener tus empresas y permisos.</p><button class="btn-inline primary-inline" data-action="ownerDemo">Continuar (verificación de prueba)</button></div>'+
     '<button class="action secondary" data-action="lostEmail">No puedo comprobar mi identidad</button>'
@@ -104,6 +112,7 @@ window.NuboxIdentity=function(api){
   function afterMfa(){return state.consented?'home':'consent'}
   function handle(a){
     if(a==='migrationInfo')setScreen('migrationInfo');
+    else if(a==='demoIndividualEmail'){state.migrationEmail='andres.individual@ejemplo.cl';setScreen('contactVerification')}
     else if(a==='startEnrollment')setScreen('verifyEnrollment');
     else if(a==='finishEnrollment'){
       if((document.getElementById('setupOtp')?.value||'')!==demoMfa)toast('Utiliza el código ficticio 482915.');
@@ -116,7 +125,7 @@ window.NuboxIdentity=function(api){
     else if(a==='lostEmail'||a==='noaccess')setScreen('lostEmail');
     else if(a==='lostMfa')setScreen('lostMfa');
     else if(a==='lostPassword')setScreen('lostPassword');
-    else if(a==='ownerDemo'){state.verifiedEmail=state.email;state.migrating=false;setScreen('login');toast('Verificación de identidad completada.')}
+    else if(a==='ownerDemo'){state.email=state.migrationEmail||state.email;state.verifiedEmail=state.email;state.migrationEmail='';state.migrating=false;state.migrationCompleted=true;setScreen(state.mfaConfigured?'mfa':'enrollMfa');toast('Cuenta anterior vinculada. Configura tu segundo factor para continuar.')}
     else if(a==='changeEmail'){state.pendingEmail='andres.nuevo@ejemplo.cl';setScreen('changeEmail')}
     else if(a==='startEmailChange')setScreen('changeEmailAuth');
     else if(a==='confirmEmailMfa'){
@@ -131,5 +140,5 @@ window.NuboxIdentity=function(api){
     return true;
   }
   function reset(){state.mfaConfigured=false;state.consented=false;state.pendingEmail='';state.previousEmail=''}
-  return {screens:{migrationInfo,enrollMfa,verifyEnrollment,mfa,recovery,lostEmail,lostMfa,lostPassword,ownership,changeEmail,changeEmailAuth,changeEmailVerify,changeEmailSuccess},startLogin,handle,reset};
+  return {screens:{migrationInfo,migrationConflict,enrollMfa,verifyEnrollment,mfa,recovery,lostEmail,lostMfa,lostPassword,ownership,changeEmail,changeEmailAuth,changeEmailVerify,changeEmailSuccess},startLogin,handle,reset};
 };
