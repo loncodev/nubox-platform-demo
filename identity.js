@@ -15,11 +15,11 @@ window.NuboxIdentity=function(api){
   )}
   function migrationConflict(){return wrap(
     aside('Correo compartido','Una cuenta por persona.','No fusionamos identidades ni cambiamos permisos automáticamente cuando un correo aparece en varios usuarios.'),
-    '<h2>Este correo ya se utiliza en otra cuenta</h2><p class="lead">El correo de contacto <strong>'+escape(state.migrationEmail||'contacto@empresa.cl')+'</strong> está asociado a otra identidad en este ejemplo.</p>'+
-    '<div class="panel"><h3>¿Cómo continuar?</h3><p>Utiliza un correo individual al que tengas acceso. Conservaremos tu ID, tus empresas y tus permisos de Perfilamento.</p>'+
-    '<button class="action" data-action="demoIndividualEmail">Usar correo individual de ejemplo</button>'+
-    '<button class="action secondary" data-action="lostEmail">No tengo otro correo disponible</button></div>'+
-    '<p class="tiny">Caso ilustrativo: la detección real de duplicados requiere consultar y preparar la base de usuarios.</p>'
+    '<h2>Correo compartido</h2><p class="lead" style="margin-bottom:13px">La dirección <strong>'+escape(state.migrationEmail||'contacto@empresa.cl')+'</strong> está vinculada a otra identidad.</p>'+
+    '<div class="panel" style="padding:16px;margin-top:8px"><h3>Usa un correo individual</h3><p>Tu ID y los permisos de Perfilamento no cambiarán.</p>'+
+    '<button class="action" style="margin-top:12px" data-action="demoIndividualEmail">Usar correo individual de ejemplo</button>'+
+    '<button class="action secondary" style="margin-top:8px" data-action="lostEmail">No tengo otro correo disponible</button></div>'+
+    '<p class="tiny">Caso ilustrativo: no se fusionan usuarios ni se habilitan accesos sin comprobar titularidad.</p>'
   )}
   function enrollMfa(){return wrap(
     aside('Primer ingreso','Activa tu protección adicional.','La primera vez configuramos un factor independiente del correo. En los accesos posteriores solo lo verificamos.'),
