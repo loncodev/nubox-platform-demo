@@ -1,4 +1,4 @@
-# Prototipo Plataforma Nubox — Business Case (no oficial)
+# Prototipo Plataforma Nubox — Business Case
 
 Prototipo estático e independiente presentado como ejercicio de entrevista. **No está asociado ni respaldado por Nubox.** Datos y empresas ficticios.
 
