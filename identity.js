@@ -160,19 +160,20 @@ window.NuboxIdentity=function(api){
     '<p>Por seguridad, los cambios de correo deben notificarse al contacto anterior. </p>'+
     '<button class="btn-inline primary-inline" data-action="page" data-page="security">Ver Seguridad de cuenta</button></div>')
   }
-  function startLegacyLogin(){if(state.mfaConfigured&&!state.trust)return 'mfa';if(state.passkeyConfigured&&!state.mfaConfigured)return 'passkeySignIn';return 'home'}
-  function startLogin(){if(!state.mfaConfigured&&!state.passkeyConfigured)return 'securityMethod';if(state.mfaConfigured&&state.trust)return afterMfa();if(state.passkeyConfigured&&state.mfaConfigured)return 'chooseLoginFactor';return state.passkeyConfigured?'emailPasskeyOnly':'mfa'}
-  function afterMfa(){return 'home'}
+  function requestedPasskeySetup(){if(state.pendingPasskeySetup&&!state.passkeyConfigured){state.pendingPasskeySetup=false;return 'passkeySetup'}return null}
+  function startLegacyLogin(){if(state.mfaConfigured&&!state.trust)return 'mfa';const requested=requestedPasskeySetup();if(requested)return requested;if(state.passkeyConfigured&&!state.mfaConfigured)return 'passkeySignIn';return 'home'}
+  function startLogin(){if(state.pendingPasskeySetup&&!state.passkeyConfigured){if(state.mfaConfigured&&!state.trust)return 'mfa';return requestedPasskeySetup()}if(!state.mfaConfigured&&!state.passkeyConfigured)return 'securityMethod';if(state.mfaConfigured&&state.trust)return afterMfa();if(state.passkeyConfigured&&state.mfaConfigured)return 'chooseLoginFactor';return state.passkeyConfigured?'emailPasskeyOnly':'mfa'}
+  function afterMfa(){return requestedPasskeySetup()||'home'}
   function handle(a){
     if(a==='migrationInfo')setScreen('migrationInfo');
     else if(a==='securityMethod')setScreen('securityMethod');
     else if(a==='startPasskeySetup')setScreen('passkeySetup');
     else if(a==='preparePasskey')setScreen('passkeyConfirm');
-    else if(a==='confirmPasskeySetup'){state.passkeyConfigured=true;const next=state.enrollmentReturnTo==='security'?'security':afterMfa();state.enrollmentReturnTo='';setScreen(next);toast('El recorrido de passkey quedó preparado.')}
-    else if(a==='beginPasskeyLogin')setScreen(state.passkeyConfigured?'passkeySignIn':'passkeyUnavailable');
+    else if(a==='confirmPasskeySetup'){state.passkeyConfigured=true;state.pendingPasskeySetup=false;const next=state.enrollmentReturnTo==='security'?'security':afterMfa();state.enrollmentReturnTo='';setScreen(next);toast('El recorrido de passkey quedó preparado.')}
+    else if(a==='beginPasskeyLogin'){state.pendingPasskeySetup=!state.passkeyConfigured;setScreen(state.passkeyConfigured?'passkeySignIn':'passkeyUnavailable')}
     else if(a==='confirmPasskeySignIn'){if(!state.passkeyConfigured){setScreen('passkeyUnavailable')}else setScreen(afterMfa())}
-    else if(a==='startTotpSetup')setScreen('enrollMfa');
-    else if(a==='startTotpLogin')setScreen(state.mfaConfigured?'mfa':'enrollMfa');
+    else if(a==='startTotpSetup'){state.pendingPasskeySetup=false;setScreen('enrollMfa')}
+    else if(a==='startTotpLogin'){state.pendingPasskeySetup=false;setScreen(state.mfaConfigured?'mfa':'enrollMfa')}
     else if(a==='individualEmailCase'){state.migrationEmail='andres.individual@ejemplo.cl';setScreen('contactVerification')}
     else if(a==='startEnrollment')setScreen('verifyEnrollment');
     else if(a==='finishEnrollment'){
@@ -201,6 +202,6 @@ window.NuboxIdentity=function(api){
     else return false;
     return true;
   }
-  function reset(){state.mfaConfigured=false;state.passkeyConfigured=false;state.enrollmentReturnTo='';state.pendingEmail='';state.previousEmail=''}
+  function reset(){state.mfaConfigured=false;state.passkeyConfigured=false;state.pendingPasskeySetup=false;state.enrollmentReturnTo='';state.pendingEmail='';state.previousEmail=''}
   return {screens:{migrationInfo,migrationConflict,securityMethod,passkeySetup,passkeyConfirm,passkeySignIn,emailPasskeyOnly,passkeyUnavailable,chooseLoginFactor,enrollMfa,verifyEnrollment,mfa,recovery,lostEmail,lostMfa,lostPassword,ownership,changeEmail,changeEmailAuth,changeEmailVerify,changeEmailSuccess},startLogin,startLegacyLogin,handle,reset};
 };
