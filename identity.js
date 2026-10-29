@@ -6,10 +6,10 @@ window.NuboxIdentity=function(api){
   function smallNote(){return ''}
   function header(eyebrow,title,subtitle,content){const k=title==='Actualizar correo de contacto'?'emailchange':title==='Verifica tu nuevo correo'?'emailcode':title==='Comprueba que eres tú'?'mfa':null;return shell('<div class="page"><div class="eyebrow">'+eyebrow+'</div><h1>'+title+(k?' '+help(k,'Más información sobre este paso'):'')+'</h1><p class="sub">'+subtitle+'</p>'+content+smallNote()+'</div>')}
   function securityMethod(){return wrap(
-    aside('Protege tu cuenta','Elige cómo quieres ingresar.','Elige el método que usarás para proteger tu ingreso a Nubox.'),
-    '<h2>Elige tu método de acceso</h2><p class="lead">Solo necesitas configurar uno. Más adelante podrás agregar el otro desde Seguridad.</p>'+ 
-    '<div class="panel"><h3>Passkey <span class="pill">Recomendado</span></h3><p>Usa la huella, el rostro o el PIN de tu dispositivo. No tendrás que recordar contraseñas ni introducir códigos.</p><button class="action" data-action="startPasskeySetup">Configurar passkey</button></div>'+
-    '<div class="panel"><h3>Aplicación autenticadora (TOTP)</h3><p>Introduce un código temporal de seis dígitos desde tu aplicación autenticadora.</p><button class="action secondary" data-action="startTotpSetup">Configurar TOTP</button></div>'+
+    aside('Seguridad del acceso','Protege tu ingreso con RUT.','Puedes utilizar una aplicación autenticadora TOTP o una passkey.'),
+    '<h2>Protege tu ingreso con RUT</h2><p class="lead">Selecciona un método de seguridad. Configura TOTP con una aplicación autenticadora o usa una passkey. Solo necesitas uno.</p>'+ 
+    '<div class="panel"><h3>Passkey <span class="pill">Recomendado</span></h3><p>Confirma con huella, rostro o PIN del dispositivo en los siguientes ingresos.</p><button class="action" data-action="startPasskeySetup">Configurar passkey</button></div>'+
+    '<div class="panel"><h3>Aplicación autenticadora (TOTP)</h3><p>Después del RUT y la contraseña, utiliza el código temporal de seis dígitos generado por tu aplicación autenticadora.</p><button class="action secondary" data-action="startTotpSetup">Configurar TOTP</button></div>'+
     '<button class="linkbtn" data-action="lostMfa">¿Necesitas ayuda para proteger tu cuenta?</button>'
   )}
   function passkeySetup(){return wrap(
@@ -52,13 +52,13 @@ window.NuboxIdentity=function(api){
     aside('Primer ingreso','Activa tu protección adicional.','La primera vez configuramos un factor independiente del correo. En los accesos posteriores solo lo verificamos.'),
     '<h2>Configura tu segundo factor '+help('mfa','¿Qué es un segundo factor?')+'</h2><p class="lead">Este paso se realiza una vez por cuenta. No se repite en cada ingreso.</p>'+
     ''+
-    '<div class="panel"><h3>1. Prepara tu aplicación autenticadora</h3><p>Abre tu aplicación autenticadora para configurar tu segundo factor.</p><h3>2. Confirma su configuración</h3><p>Continúa para verificar que está lista.</p></div>'+
+    '<div class="panel"><h3>1. Agrega Nubox a tu aplicación</h3><p>En una cuenta real se muestra un QR o una clave para vincular la aplicación. En este recorrido, continúa con el código de verificación indicado en el paso siguiente.</p><h3>2. Comprueba tu código</h3><p>Una vez configurado, TOTP se pedirá en los próximos ingresos con RUT y contraseña.</p></div>'+
     '<button class="action" data-action="startEnrollment">Continuar</button>'+
     '<div class="aux"><button class="linkbtn" data-action="lostMfa">No tengo un dispositivo disponible</button></div>'
   )}
   function verifyEnrollment(){return wrap(
     aside('Primer ingreso','Verifiquemos el nuevo factor.','Un paso inicial para comprobar que el usuario tiene acceso al factor que acaba de registrar.'),
-    '<h2>Comprueba tu segundo factor '+help('mfa','Configuración inicial del factor')+'</h2><p class="lead">Introduce el código generado por tu aplicación autenticadora.</p>'+
+    '<h2>Confirma TOTP '+help('mfa','Configuración inicial del factor')+'</h2><p class="lead">Introduce el código de seis dígitos para completar la configuración.</p>'+
     '<label class="field" for="setupOtp">Código de verificación</label><input class="text-input code" id="setupOtp" maxlength="6" inputmode="numeric" autocomplete="off" placeholder="••••••">'+
     '<div class="info">Código de verificación: <strong>'+mfaCode+'</strong>.</div>'+
     '<label class="toggle-row"><input type="checkbox" id="setupTrust"><span><strong style="display:block;font-size:13px">Confiar en este dispositivo</strong><small class="tiny">Durante 30 días '+help('trust','¿Qué significa confiar en el equipo?')+'</small></span></label>'+
@@ -66,7 +66,7 @@ window.NuboxIdentity=function(api){
   )}
   function mfa(){return wrap(
     aside('Ingreso habitual','Un acceso protegido.','Tu factor ya está configurado. Ahora solo comprobamos tu identidad antes de abrir la plataforma.'),
-    '<h2>Verifica que eres tú '+help('mfalogin','Sobre el ingreso habitual')+'</h2><p class="lead">Abre tu aplicación autenticadora para continuar como <strong>'+escape(state.email)+'</strong>.</p>'+
+    '<h2>Verifica tu código TOTP '+help('mfalogin','Sobre el ingreso habitual')+'</h2><p class="lead">Después de ingresar con RUT y contraseña, introduce el código de tu aplicación autenticadora.</p>'+
     '<label class="field" for="otp">Código de tu segundo factor</label><input class="text-input code" id="otp" maxlength="6" inputmode="numeric" autocomplete="off" placeholder="••••••">'+
     '<div class="info">Código de verificación: <strong>'+mfaCode+'</strong>.</div>'+
     '<label class="toggle-row"><input type="checkbox" id="trust" '+(state.trust?'checked':'')+'><span><strong style="display:block;font-size:13px">Confiar en este dispositivo</strong><small class="tiny">Hasta 30 días '+help('trust','Sobre los dispositivos confiables')+'</small></span></label>'+
@@ -130,7 +130,16 @@ window.NuboxIdentity=function(api){
     '<button class="btn-inline primary-inline" data-action="page" data-page="security">Ver Seguridad de cuenta</button></div>')
   }
   function requestedPasskeySetup(){if(state.pendingPasskeySetup&&!state.passkeyConfigured){state.pendingPasskeySetup=false;return 'passkeySetup'}return null}
-  function startLegacyLogin(){if(state.mfaConfigured&&!state.trust)return 'mfa';const requested=requestedPasskeySetup();if(requested)return requested;if(state.passkeyConfigured&&!state.mfaConfigured)return 'passkeySignIn';return 'home'}
+  function startLegacyLogin(){
+    if(state.pendingPasskeySetup&&!state.passkeyConfigured){
+      if(state.mfaConfigured&&!state.trust)return 'mfa';
+      return requestedPasskeySetup()||'passkeySetup';
+    }
+    if(!state.mfaConfigured&&!state.passkeyConfigured)return 'securityMethod';
+    if(state.mfaConfigured&&state.passkeyConfigured)return state.trust?'home':'chooseLoginFactor';
+    if(state.mfaConfigured)return state.trust?'home':'mfa';
+    return 'passkeySignIn';
+  }
   function startGoogleLogin(){return requestedPasskeySetup()||'home'}
   function afterMfa(){return requestedPasskeySetup()||'home'}
   function handle(a){
