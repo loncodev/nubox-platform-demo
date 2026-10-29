@@ -7,16 +7,16 @@ window.NuboxIdentity=function(api){
   function header(eyebrow,title,subtitle,content){const k=title==='Cambiar correo de acceso'?'emailchange':title==='Verifica tu nuevo correo'?'emailcode':title==='Comprueba que eres tú'?'mfa':null;return shell('<div class="page"><div class="eyebrow">'+eyebrow+'</div><h1>'+title+(k?' '+help(k,'Más información sobre este paso'):'')+'</h1><p class="sub">'+subtitle+'</p>'+content+smallNote()+'</div>')}
   function migrationInfo(){return wrap(
     aside('Transición','Actualizamos tu forma de ingresar.','Nubox ya gestiona tus accesos. Verificaremos el correo y activaremos MFA sin modificar esos permisos.'),
-    '<h2>Estamos renovando tu ingreso '+help('why','¿Por qué cambia el ingreso?')+'</h2><p class="lead">Prepararemos los datos de todos, pero cada usuario confirma su migración de forma segura.</p>'+
+    '<h2>Estamos renovando tu ingreso '+help('why','¿Por qué cambia el ingreso?')+'</h2><p class="lead">Verifica tu correo electrónico y elige un método seguro para ingresar.</p>'+
     '<div class="cutoff"><strong>Fecha de corte: '+deadline+' '+help('deadline','Sobre la fecha de corte')+'</strong><span>Cada grupo tendrá un plazo comunicado con anticipación.</span></div>'+
-    '<div class="panel"><h3>¿Qué cambia?</h3><p>El RUT deja de utilizarse para ingresar. Necesitarás un correo individual verificado y MFA.</p><h3>¿Qué se mantiene?</h3><p>Tu ID de usuario, el RUT registrado y los permisos que gestiona Perfilamento.</p><h3>¿Qué debes hacer?</h3><p>Validar que controlas la cuenta actual, verificar el correo y configurar MFA. Si compartes correo con otra cuenta, deberás elegir uno individual.</p></div>'+
+    '<div class="panel"><h3>¿Qué cambia?</h3><p>El RUT deja de utilizarse para ingresar. Necesitarás un correo individual verificado y MFA.</p><h3>¿Qué se mantiene?</h3><p>Tus empresas, productos y accesos.</p><h3>¿Qué debes hacer?</h3><p>Validar que controlas la cuenta actual, verificar el correo y configurar MFA. Si compartes correo con otra cuenta, deberás elegir uno individual.</p></div>'+
     '<button class="action" data-action="rut">Actualizar mi ingreso desde RUT</button><button class="action secondary" data-action="login">Ya ingreso con correo</button>'+
     ''
   )}
   function migrationConflict(){return wrap(
-    aside('Correo compartido','Una cuenta por persona.','No fusionamos identidades ni cambiamos permisos automáticamente cuando un correo aparece en varios usuarios.'),
+    aside('Correo compartido','Una cuenta por persona.','Cada cuenta debe tener su propio correo de ingreso.'),
     '<h2>Correo compartido</h2><p class="lead" style="margin-bottom:13px">La dirección <strong>'+escape(state.migrationEmail||'contacto@empresa.cl')+'</strong> está vinculada a otra identidad.</p>'+
-    '<div class="panel" style="padding:16px;margin-top:8px"><h3>Usa un correo individual</h3><p>Tu ID y los permisos de Perfilamento no cambiarán.</p>'+
+    '<div class="panel" style="padding:16px;margin-top:8px"><h3>Usa un correo individual</h3><p>Tus empresas y productos seguirán disponibles.</p>'+
     '<button class="action" style="margin-top:12px" data-action="individualEmailCase">Utilizar otro correo</button>'+
     '<button class="action secondary" style="margin-top:8px" data-action="lostEmail">No tengo otro correo disponible</button></div>'+
     '<p class="tiny">No se fusionarán las cuentas ni se modificarán sus permisos.</p>'
@@ -113,7 +113,7 @@ window.NuboxIdentity=function(api){
   function lostMfa(){return recoverDetails('mfa')}
   function lostPassword(){return recoverDetails('password')}
   function ownership(){return wrap(
-    aside('Migración','Validamos antes de vincular.','RUT y correo nuevo son datos declarativos; verificar el buzón no prueba que seas titular de la cuenta antigua.'),
+    aside('Migración','Confirmamos que eres tú.','RUT y correo nuevo son datos declarativos; verificar el buzón no prueba que seas titular de la cuenta antigua.'),
     '<h2>Confirma tu identidad anterior '+help('migration','Por qué verificamos la cuenta original')+'</h2><p class="lead">Has verificado el nuevo correo <strong>'+escape(state.migrationEmail||state.email)+'</strong>.</p>'+
     '<div class="alert-compact">Para continuar, debemos comprobar que controlas la cuenta original mediante su autenticación o verificación asistida.</div>'+
     '<div class="panel"><h3>Verificación de identidad</h3><p>Confirma el control de tu cuenta anterior para mantener tus empresas y permisos.</p><button class="btn-inline primary-inline" data-action="ownerDemo">Confirmar identidad</button></div>'+
