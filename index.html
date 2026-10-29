@@ -51,7 +51,7 @@
 <div class="prototype-utilities"><button id="reset" type="button" aria-label="Reiniciar recorrido">Reiniciar ↻</button></div>
 <main id="app"></main>
 <script src="extras.js"></script>
-<script src="identity.js?v=58ef2498"></script>
+<script src="identity.js?v=01802b14"></script>
 <script>
 (() => {
 'use strict';
@@ -68,7 +68,7 @@ const HELP_TEXT={
  mfa:'Puedes usar una aplicación autenticadora para generar códigos TOTP que cambian cada 30 segundos. Es una alternativa a la passkey.',
  mfalogin:'Introduce el código temporal de seis dígitos de tu aplicación autenticadora. Si registraste una passkey, también puedes ingresar con ella.',
  trust:'Si marcas este dispositivo como confiable, podrías omitir el código en futuros ingresos durante 30 días. No se recomienda en computadores compartidos.',
- password:'La contraseña de Nubox y la de Gmail u Outlook son independientes. El cambio afectaría a productos integrados y podría revocar otras sesiones, según la política aprobada.',
+ password:'Si ingresas con RUT, la contraseña de Nubox es independiente de la contraseña de Google. Si eliges Google, el ingreso se realiza con tu cuenta de Google.',
  emailchange:'Actualizar el correo de contacto no cambia tus métodos de acceso ni los permisos de tu cuenta.',
  recovery:'Si perdiste el buzón o el segundo factor, la recuperación no puede omitir la comprobación de titularidad. Se propone una vía segura asistida por Soporte.',
  permissions:'Los roles determinan qué productos y funciones puede utilizar cada miembro de tu empresa.',
@@ -121,11 +121,9 @@ function rutAccess(){return wrap(
  '<form id="rutloginform"><label class="field" for="rutlogin">RUT de usuario</label><input class="text-input" id="rutlogin" autocomplete="username" value="'+escape(state.rut||'12.345.678-9')+'" placeholder="12.345.678-9" required>'+
  '<label class="field" for="legacyPassword">Contraseña</label><input class="text-input" type="password" id="legacyPassword" value="clave-ilustrativa" readonly autocomplete="off" aria-label="Contraseña precompletada para el recorrido">'+
  '<button class="action" type="submit">Ingresar</button></form>'+
- '<div class="aux"><button class="linkbtn" type="button" data-action="emailAccess">Ingresar con correo</button><button class="linkbtn" type="button" data-action="recover">Recuperar acceso</button></div>'
+ '<div class="aux"><button class="linkbtn" type="button" data-action="google">Continuar con Google</button><button class="linkbtn" type="button" data-action="recover">Recuperar acceso</button></div>'
 )}
 
-function recovery(){return wrap(aside('Recuperación','Un acceso seguro también debe ser recuperable.','Cuando el usuario no controla el correo o la credencial, la solución exige un mecanismo alternativo verificado.'),`<h2>Necesitas ayuda para ingresar</h2><p class="lead">Para evitar cambios de correo fraudulentos, la recuperación requiere comprobación adicional de titularidad.</p><div class="alert-compact">Escenario excepcional: correo desactualizado o inaccesible.</div><div class="panel"><h3>Recuperación asistida</h3><p>En una implementación real, Nubox definiría con Seguridad y Soporte un procedimiento de recuperación. No corresponde habilitar cambios de correo sin controles de identidad.</p><button class="btn-inline primary-inline" data-action="support">Contactar a Soporte</button></div><button class="action secondary" data-action="login">Volver al inicio</button>`)}
-function mfa(){const em=escape(state.email);return wrap(aside('Seguridad','Seguro, sin fricción.','Segundo factor y dispositivo confiable durante 30 días.'),`<h2>Verifica que eres tú</h2><p class="lead">Te enviamos un código de acceso a <strong>${em}</strong>.</p><label class="field" for="otp">Código de verificación</label><input class="text-input code" id="otp" maxlength="6" inputmode="numeric" placeholder="••••••" aria-label="Código de segundo factor"><label class="toggle-row"><input type="checkbox" id="trust" ${state.trust?'checked':''}><span><strong style="display:block;font-size:13px">Confiar en este dispositivo</strong><small class="tiny">No pedir el código durante 30 días en este equipo (supuesto a validar).</small></span></label><button class="action" data-action="verifymfa">Verificar</button><div class="aux"><button class="linkbtn" data-action="resend">Reenviar código</button><span class="tiny">Código de verificación: <strong>482915</strong></span></div><div class="info">El método de verificación y la política de dispositivo confiable deberán ser aprobados por Seguridad.</div>`)}
 function menuButton(route,label,ico){return `<button class="navbtn ${state.screen===route?'active':''}" data-action="page" data-page="${route}">${icons[ico]}<span>${label}</span></button>`}
 function shell(body){const c=companies[state.company];return `<div class="home"><aside class="sidebar">${brand()}<nav class="side-nav">${menuButton('home','Mi plataforma','home')}${menuButton('products','Mis productos','apps')}${menuButton('subscriptions','Mis suscripciones','credit')}${menuButton('catalog','Contratar planes','apps')}${menuButton('billing','Facturas y pagos','credit')}${menuButton('members','Usuarios y accesos','users')}${menuButton('security','Seguridad','shield')}${menuButton('account','Mi cuenta','users')}</nav></aside><div class="workspace"><header class="topbar"><div class="company-picker"><button class="picker" data-action="companymenu"><span class="avatar">${c.name[0]}</span><span class="picker-txt">${escape(c.name)}<small>RUT ${escape(c.rut)}</small></span><span class="chevron">▾</span></button>${state.menuOpen?`<div class="company-menu">${companies.map((co,i)=>`<button class="company-item" data-action="company" data-index="${i}"><span class="avatar">${co.name[0]}</span><span><strong>${escape(co.name)}</strong><small>${escape(co.rut)} ${i===state.company?' · seleccionada':''}</small></span></button>`).join('')}</div>`:''}</div><div class="userpill"><span>Andrés · Cuenta verificada</span><div class="avatar">A</div></div></header>${body}</div></div>`}
 function prodCard(code,enabled){const p=productInfo[code];return `<button class="product ${!enabled?'preview':''}" style="--c:${p.color}" data-action="${enabled?'product':'extra-offer'}" data-code="${code}"><span class="stripe"></span><span class="letters">${code}</span><span class="caption">${p.name}</span><span class="foot">${enabled?'Abrir producto ↗':'Conocer plan →'}</span></button>`}
@@ -145,7 +143,7 @@ function securityMfa(){return shell('<div class="page"><div class="eyebrow">Mi c
  (state.passkeyConfigured?'<p>Confirmar con passkey.</p><button class="btn-inline primary-inline" data-action="finishSecurityPasskey">Verificar con passkey</button>':'')+
  (state.mfaConfigured?'<p>O introducir el código de tu aplicación autenticadora.</p><label class="field" for="securityotp">Código TOTP</label><input class="text-input code" id="securityotp" maxlength="6" inputmode="numeric" autocomplete="off" placeholder="••••••"><p class="tiny">Código para este recorrido: <strong>482915</strong></p><button class="btn-inline" data-action="finishSecurityMfa">Verificar TOTP</button>':'')+
  '<div class="extra-actions"><button class="btn-inline" data-action="page" data-page="security">Cancelar</button></div></div></div>')}
-function render(){const outputs={login,googleAccess,rutAccess,recovery,mfa,home,products,security,account,product,changePassword,changePasswordMfa,passwordChanged,sessions,securityMfa,...extra.screens,...identity.screens};app.innerHTML=(outputs[state.screen]||login)();attach();}
+function render(){const outputs={login,googleAccess,rutAccess,home,products,security,account,product,changePassword,changePasswordMfa,passwordChanged,sessions,securityMfa,...extra.screens,...identity.screens};app.innerHTML=(outputs[state.screen]||login)();attach();}
 function attach(){const rutForm=document.querySelector('#rutloginform');if(rutForm)rutForm.addEventListener('submit',e=>{e.preventDefault();const rut=document.getElementById('rutlogin').value.trim();if(!rut)return toast('Ingresa tu RUT para continuar.');state.rut=rut;setScreen(identity.startLegacyLogin())});document.querySelectorAll('[data-action]').forEach(el=>el.addEventListener('click',e=>{const a=el.dataset.action;if(identity.handle(a,el))return;
 if(a==='rut'){if(state.screen!=='passkeyUnavailable')state.pendingPasskeySetup=false;setScreen('rutAccess')}
 else if(a==='google'){if(state.screen!=='passkeyUnavailable')state.pendingPasskeySetup=false;setScreen('googleAccess')}
@@ -153,7 +151,7 @@ else if(a==='googleContinue')setScreen(identity.startGoogleLogin())
 else if(a==='login'){state.pendingPasskeySetup=false;setScreen('login')}
 else if(a==='recover'||a==='noaccess')setScreen('recovery')
 else if(a==='support')toast('Solicitud recibida. Es necesario validar tu identidad antes de recuperar el acceso.')
-else if(a==='verifymfa'){if((document.getElementById('otp')?.value||'')!=='482915')toast('Introduce el código 482915.');else{state.trust=!!document.getElementById('trust').checked;setScreen('home')}}
+
 
 else if(a==='companymenu'){state.menuOpen=!state.menuOpen;render()}else if(a==='company'){state.company=Number(el.dataset.index);setScreen('home')}
 else if(a==='page')setScreen(el.dataset.page);else if(a==='product'){state.chosenProduct=el.dataset.code;setScreen('product')}
