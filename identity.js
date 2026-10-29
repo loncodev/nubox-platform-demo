@@ -158,7 +158,7 @@ window.NuboxIdentity=function(api){
     else if(a==='securityMethod')setScreen('securityMethod');
     else if(a==='startPasskeySetup')setScreen('passkeySetup');
     else if(a==='preparePasskey')setScreen('passkeyConfirm');
-    else if(a==='confirmPasskeySetup'){state.passkeyConfigured=true;setScreen(afterMfa());toast('Passkey añadida a tu cuenta.')}
+    else if(a==='confirmPasskeySetup'){state.passkeyConfigured=true;const next=state.enrollmentReturnTo==='security'?'security':afterMfa();state.enrollmentReturnTo='';setScreen(next);toast('Opción de ingreso con passkey activada para esta sesión.')}
     else if(a==='beginPasskeyLogin')setScreen(state.passkeyConfigured?'passkeySignIn':'passkeyUnavailable');
     else if(a==='confirmPasskeySignIn'){if(!state.passkeyConfigured){setScreen('passkeyUnavailable')}else setScreen(afterMfa())}
     else if(a==='startTotpSetup')setScreen('enrollMfa');
@@ -167,7 +167,7 @@ window.NuboxIdentity=function(api){
     else if(a==='startEnrollment')setScreen('verifyEnrollment');
     else if(a==='finishEnrollment'){
       if((document.getElementById('setupOtp')?.value||'')!==mfaCode)toast('Introduce el código 482915.');
-      else{state.mfaConfigured=true;state.trust=!!document.getElementById('setupTrust')?.checked;setScreen(afterMfa());toast('Segundo factor configurado correctamente.')}
+      else{state.mfaConfigured=true;state.trust=!!document.getElementById('setupTrust')?.checked;const next=state.enrollmentReturnTo==='security'?'security':afterMfa();state.enrollmentReturnTo='';setScreen(next);toast('Segundo factor configurado correctamente.')}
     }
     else if(a==='verifymfa'){
       if((document.getElementById('otp')?.value||'')!==mfaCode)toast('Introduce el código 482915.');
@@ -190,6 +190,6 @@ window.NuboxIdentity=function(api){
     else return false;
     return true;
   }
-  function reset(){state.mfaConfigured=false;state.passkeyConfigured=false;state.consented=false;state.pendingEmail='';state.previousEmail=''}
+  function reset(){state.mfaConfigured=false;state.passkeyConfigured=false;state.enrollmentReturnTo='';state.consented=false;state.pendingEmail='';state.previousEmail=''}
   return {screens:{migrationInfo,migrationConflict,securityMethod,passkeySetup,passkeyConfirm,passkeySignIn,passkeyUnavailable,chooseLoginFactor,enrollMfa,verifyEnrollment,mfa,recovery,lostEmail,lostMfa,lostPassword,ownership,changeEmail,changeEmailAuth,changeEmailVerify,changeEmailSuccess},startLogin,handle,reset};
 };
