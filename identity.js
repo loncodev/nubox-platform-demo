@@ -4,24 +4,7 @@ window.NuboxIdentity=function(api){
   const mfaCode='482915',emailCode='742618';
   const deadline='por confirmar para tu cohorte';
   function smallNote(){return ''}
-  function header(eyebrow,title,subtitle,content){const k=title==='Cambiar correo de acceso'?'emailchange':title==='Verifica tu nuevo correo'?'emailcode':title==='Comprueba que eres tú'?'mfa':null;return shell('<div class="page"><div class="eyebrow">'+eyebrow+'</div><h1>'+title+(k?' '+help(k,'Más información sobre este paso'):'')+'</h1><p class="sub">'+subtitle+'</p>'+content+smallNote()+'</div>')}
-  function migrationInfo(){return wrap(
-    aside('Transición','Actualizamos tu forma de ingresar.','Nubox ya gestiona tus accesos. Verificaremos el correo y activaremos MFA sin modificar esos permisos.'),
-    '<h2>Estamos renovando tu ingreso '+help('why','¿Por qué cambia el ingreso?')+'</h2><p class="lead">Verifica tu correo electrónico y elige un método seguro para ingresar.</p>'+
-    '<div class="cutoff"><strong>Fecha de corte: '+deadline+' '+help('deadline','Sobre la fecha de corte')+'</strong><span>Cada grupo tendrá un plazo comunicado con anticipación.</span></div>'+
-    '<div class="panel"><h3>¿Qué cambia?</h3><p>El RUT deja de utilizarse para ingresar. Necesitarás un correo individual verificado y MFA.</p><h3>¿Qué se mantiene?</h3><p>Tus empresas, productos y accesos.</p><h3>¿Qué debes hacer?</h3><p>Validar que controlas la cuenta actual, verificar el correo y configurar MFA. Si compartes correo con otra cuenta, deberás elegir uno individual.</p></div>'+
-    '<button class="action" data-action="rut">Actualizar mi ingreso desde RUT</button><button class="action secondary" data-action="login">Ya ingreso con correo</button>'+
-    ''
-  )}
-  function migrationConflict(){return wrap(
-    aside('Correo compartido','Una cuenta por persona.','Cada cuenta debe tener su propio correo de ingreso.'),
-    '<h2>Correo compartido</h2><p class="lead" style="margin-bottom:13px">La dirección <strong>'+escape(state.migrationEmail||'contacto@empresa.cl')+'</strong> está vinculada a otra identidad.</p>'+
-    '<div class="panel" style="padding:16px;margin-top:8px"><h3>Usa un correo individual</h3><p>Tus empresas y productos seguirán disponibles.</p>'+
-    '<button class="action" style="margin-top:12px" data-action="individualEmailCase">Utilizar otro correo</button>'+
-    '<button class="action secondary" style="margin-top:8px" data-action="lostEmail">No tengo otro correo disponible</button></div>'+
-    '<p class="tiny">No se fusionarán las cuentas ni se modificarán sus permisos.</p>'
-  )}
-
+  function header(eyebrow,title,subtitle,content){const k=title==='Actualizar correo de contacto'?'emailchange':title==='Verifica tu nuevo correo'?'emailcode':title==='Comprueba que eres tú'?'mfa':null;return shell('<div class="page"><div class="eyebrow">'+eyebrow+'</div><h1>'+title+(k?' '+help(k,'Más información sobre este paso'):'')+'</h1><p class="sub">'+subtitle+'</p>'+content+smallNote()+'</div>')}
   function securityMethod(){return wrap(
     aside('Protege tu cuenta','Elige cómo quieres ingresar.','Elige el método que usarás para proteger tu ingreso a Nubox.'),
     '<h2>Elige tu método de acceso</h2><p class="lead">Solo necesitas configurar uno. Más adelante podrás agregar el otro desde Seguridad.</p>'+ 
@@ -51,19 +34,12 @@ window.NuboxIdentity=function(api){
     '<button class="action" data-action="confirmPasskeySignIn">Continuar</button>'+
     '<div class="aux"><button class="linkbtn" data-action="login">Ingresar de otra forma</button></div>'
   )}
-  function emailPasskeyOnly(){return wrap(
-    aside('Ingreso con correo','Tu cuenta está protegida con passkey.','Después de identificarte por correo, puedes confirmar el acceso con tu passkey.'),
-    '<h2>Continúa con tu passkey</h2>'+
-    '<p class="lead">El único método de acceso configurado para <strong>'+escape(state.email)+'</strong> es una passkey.</p>'+
-    '<button class="action" data-action="beginPasskeyLogin">Ingresar con passkey</button>'+
-    '<div class="aux"><button class="linkbtn" data-action="lostMfa">No puedo usar mi passkey</button>'+
-    '<button class="linkbtn" data-action="login">Volver al inicio</button></div>'
-  )}
   function passkeyUnavailable(){return wrap(
-    aside('Ingreso con passkey','Activa tu nuevo método de acceso.','Primero debes asociar una passkey a tu cuenta.'),
-    '<h2>Aún no tienes una passkey</h2><p class="lead">Ingresa con tu correo o RUT. Podrás configurar la passkey una vez que confirmes tu identidad.</p>'+
-    '<button class="action" data-action="emailAccess">Ingresar con correo</button>'+
-    '<button class="action secondary" data-action="rut">Ingresar con RUT</button>'
+    aside('Ingreso con passkey','Activa tu nuevo método de acceso.','Primero debes vincular una passkey a tu cuenta.'),
+    '<h2>Aún no tienes una passkey</h2><p class="lead">Ingresa con tu método habitual para registrar una passkey en tu cuenta.</p>'+
+    '<button class="action" data-action="google">Continuar con Google</button>'+
+    '<button class="action secondary" data-action="rut">Ingresar con RUT</button>'+
+    '<div class="aux"><button class="linkbtn" data-action="login">Volver al inicio</button></div>'
   )}
   function chooseLoginFactor(){return wrap(
     aside('Seguridad','Elige cómo verificar tu ingreso.','Tienes más de una forma de proteger tu cuenta.'),
@@ -120,15 +96,8 @@ window.NuboxIdentity=function(api){
   function lostEmail(){return recoverDetails('email')}
   function lostMfa(){return recoverDetails('mfa')}
   function lostPassword(){return recoverDetails('password')}
-  function ownership(){return wrap(
-    aside('Migración','Confirmamos que eres tú.','RUT y correo nuevo son datos declarativos; verificar el buzón no prueba que seas titular de la cuenta antigua.'),
-    '<h2>Confirma tu identidad anterior '+help('migration','Por qué verificamos la cuenta original')+'</h2><p class="lead">Has verificado el nuevo correo <strong>'+escape(state.migrationEmail||state.email)+'</strong>.</p>'+
-    '<div class="alert-compact">Para continuar, debemos comprobar que controlas la cuenta original mediante su autenticación o verificación asistida.</div>'+
-    '<div class="panel"><h3>Verificación de identidad</h3><p>Confirma el control de tu cuenta anterior para mantener tus empresas y permisos.</p><button class="btn-inline primary-inline" data-action="ownerDemo">Confirmar identidad</button></div>'+
-    '<button class="action secondary" data-action="lostEmail">No puedo comprobar mi identidad</button>'
-  )}
-  function changeEmail(){return header('Mi cuenta · Seguridad','Cambiar correo de acceso',
-    'Tu identidad interna y tus permisos se mantienen. Cambiar el correo no significa crear otra cuenta.',
+  function changeEmail(){return header('Mi cuenta · Seguridad','Actualizar correo de contacto',
+    'El nuevo correo se utilizará para contactarte. No cambia tus métodos de ingreso.',
     '<div class="panel"><h3>1. Solicitud de cambio</h3>'+
     '<div class="settings-row"><span>Correo actual</span><strong>'+escape(state.email)+'</strong></div>'+
     '<div class="settings-row"><span>Correo nuevo</span><strong>'+escape(state.pendingEmail||'andres.nuevo@ejemplo.cl')+'</strong></div>'+
@@ -145,16 +114,16 @@ window.NuboxIdentity=function(api){
     '<div class="extra-actions"><button class="btn-inline" data-action="page" data-page="security">Cancelar</button></div></div>')
   }
   function changeEmailVerify(){return header('Mi cuenta · Cambio de correo','Verifica tu nuevo correo',
-    'El nuevo buzón debe ser accesible antes de convertirlo en tu identificador de ingreso.',
+    'Verificamos el nuevo correo para enviar a esa dirección las comunicaciones de tu cuenta.',
     '<div class="panel"><h3>3. Código de correo</h3><p>Correo nuevo: <strong>'+escape(state.pendingEmail||'andres.nuevo@ejemplo.cl')+'</strong>.</p>'+
     '<label class="field" for="newEmailOtp">Código enviado al correo nuevo</label><input id="newEmailOtp" class="text-input code" maxlength="6" inputmode="numeric" autocomplete="off" placeholder="••••••">'+
     '<div class="info">Código de verificación de correo: <strong>'+emailCode+'</strong>.</div>'+
     '<div class="extra-actions"><button class="btn-inline primary-inline" data-action="confirmNewEmail">Verificar y cambiar correo</button><button class="btn-inline" data-action="page" data-page="security">Cancelar</button></div></div>')
   }
   function changeEmailSuccess(){return header('Mi cuenta · Cambio de correo','Correo actualizado',
-    'Los productos y empresas vinculados a la identidad siguen siendo los mismos.',
+    'El correo de contacto fue actualizado; tus métodos de acceso y permisos no cambian.',
     '<div class="panel"><h3>✓ Cambio completado</h3>'+
-    '<div class="settings-row"><span>Identificador actual</span><strong>'+escape(state.email)+'</strong></div>'+
+    '<div class="settings-row"><span>Correo de contacto</span><strong>'+escape(state.email)+'</strong></div>'+
     '<div class="settings-row"><span>Empresas y permisos</span><strong>Conservados</strong></div>'+
     '<div class="settings-row"><span>Otras sesiones y dispositivos confiables</span><strong>Revocados</strong></div>'+
     '<p>Por seguridad, los cambios de correo deben notificarse al contacto anterior. </p>'+
@@ -162,11 +131,10 @@ window.NuboxIdentity=function(api){
   }
   function requestedPasskeySetup(){if(state.pendingPasskeySetup&&!state.passkeyConfigured){state.pendingPasskeySetup=false;return 'passkeySetup'}return null}
   function startLegacyLogin(){if(state.mfaConfigured&&!state.trust)return 'mfa';const requested=requestedPasskeySetup();if(requested)return requested;if(state.passkeyConfigured&&!state.mfaConfigured)return 'passkeySignIn';return 'home'}
-  function startLogin(){if(state.pendingPasskeySetup&&!state.passkeyConfigured){if(state.mfaConfigured&&!state.trust)return 'mfa';return requestedPasskeySetup()}if(!state.mfaConfigured&&!state.passkeyConfigured)return 'securityMethod';if(state.mfaConfigured&&state.trust)return afterMfa();if(state.passkeyConfigured&&state.mfaConfigured)return 'chooseLoginFactor';return state.passkeyConfigured?'emailPasskeyOnly':'mfa'}
+  function startGoogleLogin(){return requestedPasskeySetup()||'home'}
   function afterMfa(){return requestedPasskeySetup()||'home'}
   function handle(a){
-    if(a==='migrationInfo')setScreen('migrationInfo');
-    else if(a==='securityMethod')setScreen('securityMethod');
+    if(a==='securityMethod')setScreen('securityMethod');
     else if(a==='startPasskeySetup')setScreen('passkeySetup');
     else if(a==='preparePasskey')setScreen('passkeyConfirm');
     else if(a==='confirmPasskeySetup'){state.passkeyConfigured=true;state.pendingPasskeySetup=false;const next=state.enrollmentReturnTo==='security'?'security':afterMfa();state.enrollmentReturnTo='';setScreen(next);toast('El recorrido de passkey quedó preparado.')}
@@ -174,7 +142,6 @@ window.NuboxIdentity=function(api){
     else if(a==='confirmPasskeySignIn'){if(!state.passkeyConfigured){setScreen('passkeyUnavailable')}else setScreen(afterMfa())}
     else if(a==='startTotpSetup'){state.pendingPasskeySetup=false;setScreen('enrollMfa')}
     else if(a==='startTotpLogin'){state.pendingPasskeySetup=false;setScreen(state.mfaConfigured?'mfa':'enrollMfa')}
-    else if(a==='individualEmailCase'){state.migrationEmail='andres.individual@ejemplo.cl';setScreen('contactVerification')}
     else if(a==='startEnrollment')setScreen('verifyEnrollment');
     else if(a==='finishEnrollment'){
       if((document.getElementById('setupOtp')?.value||'')!==mfaCode)toast('Introduce el código 482915.');
@@ -187,7 +154,6 @@ window.NuboxIdentity=function(api){
     else if(a==='lostEmail'||a==='noaccess')setScreen('lostEmail');
     else if(a==='lostMfa')setScreen('lostMfa');
     else if(a==='lostPassword')setScreen('lostPassword');
-    else if(a==='ownerDemo'){state.email=state.migrationEmail||state.email;state.verifiedEmail=state.email;state.migrationEmail='';state.migrating=false;state.migrationCompleted=true;setScreen(state.mfaConfigured||state.passkeyConfigured?'security':'securityMethod');toast('Tu correo de ingreso ha sido actualizado.')}
     else if(a==='changeEmail'){state.pendingEmail='andres.nuevo@ejemplo.cl';setScreen('changeEmail')}
     else if(a==='startEmailChange')setScreen('changeEmailAuth');
     else if(a==='confirmEmailPasskey'){setScreen('changeEmailVerify')}
@@ -203,5 +169,5 @@ window.NuboxIdentity=function(api){
     return true;
   }
   function reset(){state.mfaConfigured=false;state.passkeyConfigured=false;state.pendingPasskeySetup=false;state.enrollmentReturnTo='';state.pendingEmail='';state.previousEmail=''}
-  return {screens:{migrationInfo,migrationConflict,securityMethod,passkeySetup,passkeyConfirm,passkeySignIn,emailPasskeyOnly,passkeyUnavailable,chooseLoginFactor,enrollMfa,verifyEnrollment,mfa,recovery,lostEmail,lostMfa,lostPassword,ownership,changeEmail,changeEmailAuth,changeEmailVerify,changeEmailSuccess},startLogin,startLegacyLogin,handle,reset};
+  return {screens:{securityMethod,passkeySetup,passkeyConfirm,passkeySignIn,passkeyUnavailable,chooseLoginFactor,enrollMfa,verifyEnrollment,mfa,recovery,lostEmail,lostMfa,lostPassword,changeEmail,changeEmailAuth,changeEmailVerify,changeEmailSuccess},startGoogleLogin,startLegacyLogin,handle,reset};
 };
