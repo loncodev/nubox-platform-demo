@@ -8,16 +8,15 @@ Abrir `index.html` en cualquier navegador moderno. No necesita backend ni creden
 
 ## Recorridos disponibles
 
-- **Inicio:** «Ingresar con passkey», «Ingresar con correo» o «Ingresar con RUT».
-- **Ingreso con RUT (cuenta pendiente de actualización):** RUT y campo de contraseña precompletado, sin capturar contraseñas reales → si tiene TOTP, verificar el código; de lo contrario, entrar directamente a la plataforma. No se pregunta si desea migrar durante el ingreso.
-- **Actualización opcional:** después de ingresar por RUT, ir a **Seguridad → Actualizar mi acceso** → verificar correo individual → confirmar titularidad → configurar passkey o TOTP si todavía no tiene un método. Una vez actualizada la cuenta, el ingreso por RUT queda inhabilitado para ese usuario.
-- **Correo compartido:** desde la actualización en Seguridad, elegir un correo individual y completar las verificaciones; nunca se fusionan cuentas basándose solo en el correo.
-- **Primera entrada con correo:** elegir passkey o aplicación autenticadora (TOTP) si todavía no tiene un método → entrar a Plataforma Nubox **sin pantalla obligatoria de términos y condiciones**.
-- **Ingreso habitual:** con passkey, entrar sin escribir RUT o correo; con correo y TOTP, verificar el código. Se pueden gestionar ambos métodos desde **Seguridad**.
-- **Registrar passkey tras intentar usarla:** «Ingresar con passkey» → «Aún no tienes una passkey» → elegir RUT o correo → completar el ingreso por ese método → «Configura tu passkey». Si se entra por RUT desde el inicio sin pedir passkey, el flujo habitual lleva a la plataforma.
-- **Cambio de correo y contraseña:** se muestran verificaciones de seguridad con los métodos configurados, preservando empresas y permisos.
-- **Ayuda y recuperación:** opciones para correo inaccesible, pérdida del autenticador y recuperación asistida.
-- **Otras vistas:** catálogo, suscripciones, facturas y usuarios por empresa como contenido de navegación ilustrativo.
+- **Ingreso a Nubox:** Passkey, Google o RUT. **No existe autenticación nativa por correo** en esta propuesta.
+- **Ingreso con Google:** «Continuar con Google» → confirmar la elección de Google → plataforma. La interfaz no ejecuta OAuth real.
+- **Ingreso con RUT:** RUT y contraseña del acceso existente → TOTP si está configurado → plataforma.
+- **Passkey ya registrada:** «Ingresar con passkey» → confirmar con el dispositivo → plataforma.
+- **Passkey sin registrar:** elegir «Ingresar con passkey» → «Aún no tienes una passkey» → autenticarse con **Google o RUT** → configurar passkey → plataforma.
+- **TOTP:** se puede configurar desde Seguridad. Es un segundo factor para el ingreso RUT; no se envía ningún correo para obtener el código TOTP.
+- **Correo de contacto:** se puede actualizar en Seguridad y verificar como dato de contacto; **no es un identificador de ingreso**.
+- **Recuperación:** ayuda ante pérdida de autenticador, correo inaccesible o contraseña olvidada, con comprobación de identidad.
+- **Otros apartados:** productos, empresas, suscripciones, pagos y usuarios por empresa permanecen como navegación ilustrativa.
 
 ## Seguridad y alcance
 
@@ -27,25 +26,20 @@ No captures contraseñas, datos bancarios ni información personal real en el pr
 
 ## Navegación y alcance (octubre 2026)
 
-**Primer proyecto del business case: migración de RUT a correo único verificado + MFA, reutilizando autenticación y Perfilamento.**
-- Login por passkey, correo o RUT durante la transición
-- Alta de passkey o TOTP como métodos alternativos y acceso a empresa/producto
-- Seguridad de cuenta, cambio de contraseña con revalidación de código y sesiones simuladas
+**Prioridad:** reforzar la autenticación de la cuenta Nubox mediante MFA y passkeys, **reutilizando la autenticación existente con RUT y Google y la autorización administrada por Perfilamento**.
 
-**Visión futura de Plataforma Nubox: fuera del compromiso P0.**
-- Catálogo de planes con selección de producto no contratado y alta simulada
-- Consulta de suscripción y productos por empresa
-- Historial ficticio de facturación y pagos, detalle de documento y cambio de método de prueba
-- Usuarios y accesos por empresa: invitación, rol básico y desactivación ficticias
-
-Todas las vistas son **simulaciones en memoria sin backend**; reiniciar/recargar puede restablecer su estado. No se emiten facturas, no se envían invitaciones, no se cobra ni se contratan servicios. **No ingresar contraseñas, tarjetas ni información personal real**. Las capacidades de catálogo, cobro, precios y roles requieren definición de Revenue, Finanzas, Seguridad e Ingeniería.
+- Passkey como alternativa preferida para ingresos posteriores, siempre vinculada al ID interno de usuario.
+- TOTP como segundo factor cuando se utilice el ingreso por RUT y la política lo requiera.
+- Acceso con Google como método ya disponible; comprobar con Seguridad los controles MFA del proveedor de identidad.
+- Conservar los permisos, empresas y productos existentes, sin intentar enlazar identidades automáticamente por coincidencia de correo.
+- La calidad del correo de contacto es un asunto de datos de contacto, no un cambio obligatorio del identificador de autenticación.
 
 ## Hipótesis y validación
 
-**Escenario arquitectónico aportado para la iteración:** Nubox dispone de una base de autenticación compartida con `id de usuario`, RUT único y correo sin restricción de unicidad. Perfilamento ya gobierna los permisos de acceso a los cinco sistemas; no se plantea reconstruir esa integración. **Diferencia importante:** el brief original declara cinco bases de usuarios separadas. Esta hipótesis debe comprobarse con Ingeniería en semana 2, incluyendo las referencias de los productos al RUT, sesiones y tokens.
+Según la información aportada para esta iteración, Nubox ya tiene ingreso por **RUT y Google**, una identidad interna compartida y **Perfilamento** para controlar empresas, productos y permisos. Debe validarse con Ingeniería qué cuentas tienen Google vinculado, cómo se asigna cada credencial a un ID interno, cómo funcionan las sesiones y qué exigencias de MFA aplican.
 
-**Estrategia:** análisis masivo de calidad y duplicados, sin mutación automática de identidades; vinculación paulatina usuario por usuario tras confirmar titularidad anterior, correo único de ingreso y MFA. El correo de contacto puede continuar compartido; no se impone `UNIQUE` sobre una columna legada sin análisis. El calendario de retirada de RUT se establece por cohortes y solo cuando exista recuperación segura.
+**No asumimos que el caso de negocio requiera migrar de RUT a correo**. Los datos de contacto desactualizados no justifican convertir el correo en credencial ni fusionar cuentas a partir de una coincidencia de dirección.
 
-El brief no define plazos oficiales, mecanismo final de MFA ni procedimientos de recuperación. La fecha de corte, uso de aplicación autenticadora, confianza durante 30 días, revocación de sesiones y canales alternativos se presentan como **propuestas sujetas a validación de Seguridad, Legal, Ingeniería, Soporte y los equipos de producto**. El código de verificación de correo se mantiene separado del segundo factor de autenticación independiente. Una contraseña cambiada en el proveedor de correo no cambia la contraseña de Nubox.
+El recorrido de Google es solo interfaz: no implementa OAuth ni autentica una cuenta real. Passkeys y TOTP también son representaciones de interacción; las implementaciones productivas requieren verificación criptográfica en el backend, inscripción segura y recuperación de cuentas.
 
-Indicadores propuestos para el piloto: porcentaje de cuentas con correo comprobado, tasa de activación de MFA, inicio de sesión exitoso, abandono durante onboarding, usuarios bloqueados, contactos recuperados y tickets de acceso por cohorte. Definir metas solo después de medir la línea base y el piloto.
+La validación de la propuesta debe medir cobertura de MFA, satisfacción y éxito de ingreso, bloqueos, tasa de recuperación y tickets de soporte.
