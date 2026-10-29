@@ -52,7 +52,7 @@ window.NuboxIdentity=function(api){
     aside('Primer ingreso','Activa tu protección adicional.','La primera vez configuramos un factor independiente del correo. En los accesos posteriores solo lo verificamos.'),
     '<h2>Configura tu segundo factor '+help('mfa','¿Qué es un segundo factor?')+'</h2><p class="lead">Este paso se realiza una vez por cuenta. No se repite en cada ingreso.</p>'+
     ''+
-    '<div class="panel"><h3>1. Agrega Nubox a tu aplicación</h3><p>En una cuenta real se muestra un QR o una clave para vincular la aplicación. En este recorrido, continúa con el código de verificación indicado en el paso siguiente.</p><h3>2. Comprueba tu código</h3><p>Una vez configurado, TOTP se pedirá en los próximos ingresos con RUT y contraseña.</p></div>'+
+    '<div class="panel"><h3>1. Prepara tu aplicación autenticadora</h3><p>TOTP utiliza un código QR o una clave de configuración para vincular la cuenta con tu aplicación.</p><h3>2. Confirma el método</h3><p>Continúa para comprobar el código de seis dígitos. Luego se solicitará en tus próximos ingresos con RUT.</p></div>'+
     '<button class="action" data-action="startEnrollment">Continuar</button>'+
     '<div class="aux"><button class="linkbtn" data-action="lostMfa">No tengo un dispositivo disponible</button></div>'
   )}
