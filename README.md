@@ -14,6 +14,7 @@ Abrir `index.html` en cualquier navegador moderno. No necesita backend ni creden
 - **Correo compartido:** desde la actualización en Seguridad, elegir un correo individual y completar las verificaciones; nunca se fusionan cuentas basándose solo en el correo.
 - **Primera entrada con correo:** elegir passkey o aplicación autenticadora (TOTP) si todavía no tiene un método → entrar a Plataforma Nubox **sin pantalla obligatoria de términos y condiciones**.
 - **Ingreso habitual:** con passkey, entrar sin escribir RUT o correo; con correo y TOTP, verificar el código. Se pueden gestionar ambos métodos desde **Seguridad**.
+- **Registrar passkey tras intentar usarla:** «Ingresar con passkey» → «Aún no tienes una passkey» → elegir RUT o correo → completar el ingreso por ese método → «Configura tu passkey». Si se entra por RUT desde el inicio sin pedir passkey, el flujo habitual lleva a la plataforma.
 - **Cambio de correo y contraseña:** se muestran verificaciones de seguridad con los métodos configurados, preservando empresas y permisos.
 - **Ayuda y recuperación:** opciones para correo inaccesible, pérdida del autenticador y recuperación asistida.
 - **Otras vistas:** catálogo, suscripciones, facturas y usuarios por empresa como contenido de navegación ilustrativo.
