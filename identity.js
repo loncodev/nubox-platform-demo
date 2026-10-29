@@ -51,10 +51,18 @@ window.NuboxIdentity=function(api){
     '<button class="action" data-action="confirmPasskeySignIn">Continuar</button>'+
     '<div class="aux"><button class="linkbtn" data-action="login">Ingresar de otra forma</button></div>'
   )}
+  function emailPasskeyOnly(){return wrap(
+    aside('Ingreso con correo','Tu cuenta está protegida con passkey.','Después de identificarte por correo, puedes confirmar el acceso con tu passkey.'),
+    '<h2>Continúa con tu passkey</h2>'+
+    '<p class="lead">El único método de acceso configurado para <strong>'+escape(state.email)+'</strong> es una passkey.</p>'+
+    '<button class="action" data-action="beginPasskeyLogin">Ingresar con passkey</button>'+
+    '<div class="aux"><button class="linkbtn" data-action="lostMfa">No puedo usar mi passkey</button>'+
+    '<button class="linkbtn" data-action="login">Volver al inicio</button></div>'
+  )}
   function passkeyUnavailable(){return wrap(
     aside('Ingreso con passkey','Activa tu nuevo método de acceso.','Primero debes asociar una passkey a tu cuenta.'),
     '<h2>Aún no tienes una passkey</h2><p class="lead">Ingresa con tu correo o RUT. Podrás configurar la passkey una vez que confirmes tu identidad.</p>'+
-    '<button class="action" data-action="login">Ingresar con correo</button>'+
+    '<button class="action" data-action="emailAccess">Ingresar con correo</button>'+
     '<button class="action secondary" data-action="rut">Ingresar con RUT</button>'
   )}
   function chooseLoginFactor(){return wrap(
@@ -153,7 +161,7 @@ window.NuboxIdentity=function(api){
     '<button class="btn-inline primary-inline" data-action="page" data-page="security">Ver Seguridad de cuenta</button></div>')
   }
   function startLegacyLogin(){if(state.mfaConfigured&&!state.trust)return 'mfa';if(state.passkeyConfigured&&!state.mfaConfigured)return 'passkeySignIn';return 'home'}
-  function startLogin(){if(!state.mfaConfigured&&!state.passkeyConfigured)return 'securityMethod';if(state.mfaConfigured&&state.trust)return afterMfa();if(state.passkeyConfigured&&state.mfaConfigured)return 'chooseLoginFactor';return state.passkeyConfigured?'passkeySignIn':'mfa'}
+  function startLogin(){if(!state.mfaConfigured&&!state.passkeyConfigured)return 'securityMethod';if(state.mfaConfigured&&state.trust)return afterMfa();if(state.passkeyConfigured&&state.mfaConfigured)return 'chooseLoginFactor';return state.passkeyConfigured?'emailPasskeyOnly':'mfa'}
   function afterMfa(){return 'home'}
   function handle(a){
     if(a==='migrationInfo')setScreen('migrationInfo');
@@ -194,5 +202,5 @@ window.NuboxIdentity=function(api){
     return true;
   }
   function reset(){state.mfaConfigured=false;state.passkeyConfigured=false;state.enrollmentReturnTo='';state.pendingEmail='';state.previousEmail=''}
-  return {screens:{migrationInfo,migrationConflict,securityMethod,passkeySetup,passkeyConfirm,passkeySignIn,passkeyUnavailable,chooseLoginFactor,enrollMfa,verifyEnrollment,mfa,recovery,lostEmail,lostMfa,lostPassword,ownership,changeEmail,changeEmailAuth,changeEmailVerify,changeEmailSuccess},startLogin,startLegacyLogin,handle,reset};
+  return {screens:{migrationInfo,migrationConflict,securityMethod,passkeySetup,passkeyConfirm,passkeySignIn,emailPasskeyOnly,passkeyUnavailable,chooseLoginFactor,enrollMfa,verifyEnrollment,mfa,recovery,lostEmail,lostMfa,lostPassword,ownership,changeEmail,changeEmailAuth,changeEmailVerify,changeEmailSuccess},startLogin,startLegacyLogin,handle,reset};
 };
