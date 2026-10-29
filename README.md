@@ -8,16 +8,15 @@ Abrir `index.html` en cualquier navegador moderno. No necesita backend ni creden
 
 ## Recorridos disponibles
 
-- **Pantalla inicial:** «Ingresar con passkey», «Ingresar con correo» o «Ingresar con RUT». La opción de RUT sigue disponible mientras el usuario actualiza su cuenta.
-- **Primera entrada:** «Ingresar con correo» o «Ingresar con RUT» → «Protege tu cuenta» → elegir **passkey** o **aplicación autenticadora (TOTP)** → consentimientos → plataforma. Con TOTP se introduce el código guiado **482915**. Con passkey se sigue una confirmación de interfaz, sin activar credenciales de dispositivo.
-- **Acceso habitual:** cerrar sesión y regresar con passkey directamente, sin escribir identificador, o con correo y TOTP. Si ambos métodos están configurados se muestra un selector. El registro y estado de los métodos se conservan durante la sesión del navegador, no en servidores.
-- **Migración RUT:** «Ingresar con RUT» → escribir RUT → «Actualizar mi acceso» → verificar correo con código **482915** → confirmar titularidad de la cuenta anterior → elegir passkey o TOTP. Se conservan empresas y permisos.
-- **Correo compartido:** «Ingresar con RUT» → «Actualizar mi acceso» → «¿Tu correo está compartido?» → continuar → elegir otro correo y completar las verificaciones. No se fusionan cuentas.
-- **Cambiar contraseña Nubox:** «Seguridad» → «Cambiar contraseña» → revalidación ficticia MFA → confirmación y revocación simulada de sesiones.
-- **Cambiar correo:** «Seguridad» → «Cambiar correo de ingreso» → código ficticio MFA **482915** → verificación del nuevo correo con código **742618** → confirmación. Conserva identidad, empresas y autorizaciones.
-- **Excepciones:** «Recuperar acceso» permite mostrar los escenarios de correo inaccesible, dispositivo MFA perdido y contraseña Nubox olvidada. Su tratamiento propone verificación asistida; no simula accesos sin validar la identidad.
-- **Visión futura:** catálogo y contratación simulada, suscripciones, documentos de cobro y usuarios por empresa. Dentro de **Usuarios y accesos**, cada perfil muestra nombre, correo, rol, estado y empresa. Las opciones de restablecer contraseña y solicitar cambio de correo requieren confirmación del titular: el administrador no recibe credenciales ni modifica el correo unilateralmente. No se envían correos ni se cambia ninguna identidad real. No forman parte del primer proyecto.
-
+- **Inicio:** «Ingresar con passkey», «Ingresar con correo» o «Ingresar con RUT».
+- **Ingreso con RUT (cuenta pendiente de actualización):** RUT y campo de contraseña precompletado, sin capturar contraseñas reales → si tiene TOTP, verificar el código; de lo contrario, entrar directamente a la plataforma. No se pregunta si desea migrar durante el ingreso.
+- **Actualización opcional:** después de ingresar por RUT, ir a **Seguridad → Actualizar mi acceso** → verificar correo individual → confirmar titularidad → configurar passkey o TOTP si todavía no tiene un método. Una vez actualizada la cuenta, el ingreso por RUT queda inhabilitado para ese usuario.
+- **Correo compartido:** desde la actualización en Seguridad, elegir un correo individual y completar las verificaciones; nunca se fusionan cuentas basándose solo en el correo.
+- **Primera entrada con correo:** elegir passkey o aplicación autenticadora (TOTP) si todavía no tiene un método → entrar a Plataforma Nubox **sin pantalla obligatoria de términos y condiciones**.
+- **Ingreso habitual:** con passkey, entrar sin escribir RUT o correo; con correo y TOTP, verificar el código. Se pueden gestionar ambos métodos desde **Seguridad**.
+- **Cambio de correo y contraseña:** se muestran verificaciones de seguridad con los métodos configurados, preservando empresas y permisos.
+- **Ayuda y recuperación:** opciones para correo inaccesible, pérdida del autenticador y recuperación asistida.
+- **Otras vistas:** catálogo, suscripciones, facturas y usuarios por empresa como contenido de navegación ilustrativo.
 
 ## Seguridad y alcance
 
