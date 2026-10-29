@@ -10,10 +10,10 @@ Abrir `index.html` en cualquier navegador moderno. No necesita backend ni creden
 
 - **Ingreso a Nubox:** Passkey, Google o RUT. **No existe autenticación nativa por correo** en esta propuesta.
 - **Ingreso con Google:** «Continuar con Google» → confirmar la elección de Google → plataforma. La interfaz no ejecuta OAuth real.
-- **Ingreso con RUT:** RUT y contraseña del acceso existente → TOTP si está configurado → plataforma.
+- **Primer ingreso con RUT:** RUT y contraseña existente → elegir **TOTP o passkey** → configurar un método → plataforma. No se requiere correo de ingreso ni configurar ambos métodos.
 - **Passkey ya registrada:** «Ingresar con passkey» → confirmar con el dispositivo → plataforma.
-- **Passkey sin registrar:** elegir «Ingresar con passkey» → «Aún no tienes una passkey» → autenticarse con **Google o RUT** → configurar passkey → plataforma.
-- **TOTP:** se puede configurar desde Seguridad. Es un segundo factor para el ingreso RUT; no se envía ningún correo para obtener el código TOTP.
+- **Passkey sin registrar:** elegir «Ingresar con passkey» → «Aún no tienes una passkey» → autenticarse con **Google o RUT** → configurar passkey → plataforma. Si ya existe TOTP, se verifica cuando corresponde antes de registrar un método adicional.
+- **Siguientes ingresos con RUT y TOTP:** RUT y contraseña → **verificar TOTP** con código de seis dígitos → plataforma (salvo dispositivo confiable). También se puede configurar TOTP desde **Seguridad**. No se envían códigos al correo para MFA.
 - **Correo de contacto:** se puede actualizar en Seguridad y verificar como dato de contacto; **no es un identificador de ingreso**.
 - **Recuperación:** ayuda ante pérdida de autenticador, correo inaccesible o contraseña olvidada, con comprobación de identidad.
 - **Otros apartados:** productos, empresas, suscripciones, pagos y usuarios por empresa permanecen como navegación ilustrativa.
