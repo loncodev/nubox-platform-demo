@@ -21,6 +21,49 @@ window.NuboxIdentity=function(api){
     '<button class="action secondary" style="margin-top:8px" data-action="lostEmail">No tengo otro correo disponible</button></div>'+
     '<p class="tiny">No se fusionarán las cuentas ni se modificarán sus permisos.</p>'
   )}
+
+  function securityMethod(){return wrap(
+    aside('Protege tu cuenta','Elige cómo quieres ingresar.','Configura un método seguro que podrás utilizar en tus próximos accesos.'),
+    '<h2>Protege tu cuenta</h2><p class="lead">Elige una opción para acceder de forma segura.</p>'+
+    '<div class="panel"><h3>Passkey <span class="pill">Recomendado</span></h3><p>Usa la huella, el rostro o el PIN de tu dispositivo. No tendrás que recordar contraseñas ni introducir códigos.</p><button class="action" data-action="startPasskeySetup">Configurar passkey</button></div>'+
+    '<div class="panel"><h3>Aplicación autenticadora (TOTP)</h3><p>Introduce un código temporal de seis dígitos desde tu aplicación autenticadora.</p><button class="action secondary" data-action="startTotpSetup">Configurar TOTP</button></div>'+
+    '<button class="linkbtn" data-action="lostMfa">¿Necesitas ayuda para proteger tu cuenta?</button>'
+  )}
+  function passkeySetup(){return wrap(
+    aside('Passkey','Un ingreso más sencillo.','Usa el método de desbloqueo de tu dispositivo para acceder a Nubox.'),
+    '<h2>Configura tu passkey</h2><p class="lead">Puedes utilizar tu huella, reconocimiento facial o el PIN del dispositivo.</p>'+
+    '<div class="panel"><h3>¿Cómo funciona?</h3><p>1. Elige dónde guardar tu passkey.</p><p>2. Confirma con tu dispositivo.</p><p>3. En futuros ingresos selecciona «Ingresar con passkey».</p></div>'+
+    '<button class="action" data-action="preparePasskey">Continuar</button>'+
+    '<div class="aux"><button class="linkbtn" data-action="securityMethod">Elegir otro método</button></div>'
+  )}
+  function passkeyConfirm(){return wrap(
+    aside('Passkey','Confirma desde tu dispositivo.','Cuando tu dispositivo esté listo, podrás acceder sin escribir tu correo ni tu RUT.'),
+    '<div class="passkey-symbol" aria-hidden="true">◉</div><h2>Confirma tu passkey</h2>'+
+    '<p class="lead">Elige «Continuar» para completar este recorrido. En el servicio real, tu dispositivo solicitará huella, rostro o PIN.</p>'+
+    '<button class="action" data-action="confirmPasskeySetup">Continuar</button>'+
+    '<div class="aux"><button class="linkbtn" data-action="passkeySetup">Volver</button></div>'
+  )}
+  function passkeySignIn(){return wrap(
+    aside('Ingreso con passkey','Tu cuenta en un solo paso.','No necesitas escribir correo, RUT ni contraseña.'),
+    '<div class="passkey-symbol" aria-hidden="true">◉</div><h2>Ingresar con passkey</h2>'+
+    '<p class="lead">Selecciona tu passkey y confirma con tu dispositivo.</p>'+
+    '<div class="panel"><strong>Cuenta Nubox</strong><p>'+escape(state.email)+'</p><small>La comprobación biométrica se representa en este recorrido, sin solicitarla al dispositivo.</small></div>'+
+    '<button class="action" data-action="confirmPasskeySignIn">Continuar</button>'+
+    '<div class="aux"><button class="linkbtn" data-action="login">Ingresar de otra forma</button></div>'
+  )}
+  function passkeyUnavailable(){return wrap(
+    aside('Ingreso con passkey','Activa tu nuevo método de acceso.','Primero debes asociar una passkey a tu cuenta.'),
+    '<h2>Aún no tienes una passkey</h2><p class="lead">Ingresa con tu correo o RUT. Podrás configurar la passkey una vez que confirmes tu identidad.</p>'+
+    '<button class="action" data-action="login">Ingresar con correo</button>'+
+    '<button class="action secondary" data-action="rut">Ingresar con RUT</button>'
+  )}
+  function chooseLoginFactor(){return wrap(
+    aside('Seguridad','Elige cómo verificar tu ingreso.','Tienes más de una forma de proteger tu cuenta.'),
+    '<h2>Verifica tu ingreso</h2><p class="lead">Selecciona uno de los métodos que ya configuraste.</p>'+
+    '<button class="action" data-action="beginPasskeyLogin">Continuar con passkey</button>'+
+    '<button class="action secondary" data-action="startTotpLogin">Usar código TOTP</button>'+
+    '<div class="aux"><button class="linkbtn" data-action="lostMfa">No puedo utilizar estos métodos</button></div>'
+  )}
   function enrollMfa(){return wrap(
     aside('Primer ingreso','Activa tu protección adicional.','La primera vez configuramos un factor independiente del correo. En los accesos posteriores solo lo verificamos.'),
     '<h2>Configura tu segundo factor '+help('mfa','¿Qué es un segundo factor?')+'</h2><p class="lead">Este paso se realiza una vez por cuenta. No se repite en cada ingreso.</p>'+
@@ -108,10 +151,18 @@ window.NuboxIdentity=function(api){
     '<p>Por seguridad, los cambios de correo deben notificarse al contacto anterior. </p>'+
     '<button class="btn-inline primary-inline" data-action="page" data-page="security">Ver Seguridad de cuenta</button></div>')
   }
-  function startLogin(){if(!state.mfaConfigured)return 'enrollMfa';if(state.trust)return state.consented?'home':'consent';return 'mfa'}
+  function startLogin(){if(!state.mfaConfigured&&!state.passkeyConfigured)return 'securityMethod';if(state.mfaConfigured&&state.trust)return afterMfa();if(state.passkeyConfigured&&state.mfaConfigured)return 'chooseLoginFactor';return state.passkeyConfigured?'passkeySignIn':'mfa'}
   function afterMfa(){return state.consented?'home':'consent'}
   function handle(a){
     if(a==='migrationInfo')setScreen('migrationInfo');
+    else if(a==='securityMethod')setScreen('securityMethod');
+    else if(a==='startPasskeySetup')setScreen('passkeySetup');
+    else if(a==='preparePasskey')setScreen('passkeyConfirm');
+    else if(a==='confirmPasskeySetup'){state.passkeyConfigured=true;setScreen(afterMfa());toast('Passkey añadida a tu cuenta.')}
+    else if(a==='beginPasskeyLogin')setScreen(state.passkeyConfigured?'passkeySignIn':'passkeyUnavailable');
+    else if(a==='confirmPasskeySignIn'){if(!state.passkeyConfigured){setScreen('passkeyUnavailable')}else setScreen(afterMfa())}
+    else if(a==='startTotpSetup')setScreen('enrollMfa');
+    else if(a==='startTotpLogin')setScreen(startLogin());
     else if(a==='individualEmailCase'){state.migrationEmail='andres.individual@ejemplo.cl';setScreen('contactVerification')}
     else if(a==='startEnrollment')setScreen('verifyEnrollment');
     else if(a==='finishEnrollment'){
@@ -139,6 +190,6 @@ window.NuboxIdentity=function(api){
     else return false;
     return true;
   }
-  function reset(){state.mfaConfigured=false;state.consented=false;state.pendingEmail='';state.previousEmail=''}
-  return {screens:{migrationInfo,migrationConflict,enrollMfa,verifyEnrollment,mfa,recovery,lostEmail,lostMfa,lostPassword,ownership,changeEmail,changeEmailAuth,changeEmailVerify,changeEmailSuccess},startLogin,handle,reset};
+  function reset(){state.mfaConfigured=false;state.passkeyConfigured=false;state.consented=false;state.pendingEmail='';state.previousEmail=''}
+  return {screens:{migrationInfo,migrationConflict,securityMethod,passkeySetup,passkeyConfirm,passkeySignIn,passkeyUnavailable,chooseLoginFactor,enrollMfa,verifyEnrollment,mfa,recovery,lostEmail,lostMfa,lostPassword,ownership,changeEmail,changeEmailAuth,changeEmailVerify,changeEmailSuccess},startLogin,handle,reset};
 };
