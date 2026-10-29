@@ -152,8 +152,9 @@ window.NuboxIdentity=function(api){
     '<p>Por seguridad, los cambios de correo deben notificarse al contacto anterior. </p>'+
     '<button class="btn-inline primary-inline" data-action="page" data-page="security">Ver Seguridad de cuenta</button></div>')
   }
+  function startLegacyLogin(){if(state.mfaConfigured&&!state.trust)return 'mfa';if(state.passkeyConfigured&&!state.mfaConfigured)return 'passkeySignIn';return 'home'}
   function startLogin(){if(!state.mfaConfigured&&!state.passkeyConfigured)return 'securityMethod';if(state.mfaConfigured&&state.trust)return afterMfa();if(state.passkeyConfigured&&state.mfaConfigured)return 'chooseLoginFactor';return state.passkeyConfigured?'passkeySignIn':'mfa'}
-  function afterMfa(){return state.consented?'home':'consent'}
+  function afterMfa(){return 'home'}
   function handle(a){
     if(a==='migrationInfo')setScreen('migrationInfo');
     else if(a==='securityMethod')setScreen('securityMethod');
@@ -177,7 +178,7 @@ window.NuboxIdentity=function(api){
     else if(a==='lostEmail'||a==='noaccess')setScreen('lostEmail');
     else if(a==='lostMfa')setScreen('lostMfa');
     else if(a==='lostPassword')setScreen('lostPassword');
-    else if(a==='ownerDemo'){state.email=state.migrationEmail||state.email;state.verifiedEmail=state.email;state.migrationEmail='';state.migrating=false;state.migrationCompleted=true;setScreen(startLogin());toast('Tu correo quedó asociado a la cuenta. Continúa con tu método de seguridad.')}
+    else if(a==='ownerDemo'){state.email=state.migrationEmail||state.email;state.verifiedEmail=state.email;state.migrationEmail='';state.migrating=false;state.migrationCompleted=true;setScreen(state.mfaConfigured||state.passkeyConfigured?'security':'securityMethod');toast('Tu correo de ingreso ha sido actualizado.')}
     else if(a==='changeEmail'){state.pendingEmail='andres.nuevo@ejemplo.cl';setScreen('changeEmail')}
     else if(a==='startEmailChange')setScreen('changeEmailAuth');
     else if(a==='confirmEmailPasskey'){setScreen('changeEmailVerify')}
@@ -192,6 +193,6 @@ window.NuboxIdentity=function(api){
     else return false;
     return true;
   }
-  function reset(){state.mfaConfigured=false;state.passkeyConfigured=false;state.enrollmentReturnTo='';state.consented=false;state.pendingEmail='';state.previousEmail=''}
-  return {screens:{migrationInfo,migrationConflict,securityMethod,passkeySetup,passkeyConfirm,passkeySignIn,passkeyUnavailable,chooseLoginFactor,enrollMfa,verifyEnrollment,mfa,recovery,lostEmail,lostMfa,lostPassword,ownership,changeEmail,changeEmailAuth,changeEmailVerify,changeEmailSuccess},startLogin,handle,reset};
+  function reset(){state.mfaConfigured=false;state.passkeyConfigured=false;state.enrollmentReturnTo='';state.pendingEmail='';state.previousEmail=''}
+  return {screens:{migrationInfo,migrationConflict,securityMethod,passkeySetup,passkeyConfirm,passkeySignIn,passkeyUnavailable,chooseLoginFactor,enrollMfa,verifyEnrollment,mfa,recovery,lostEmail,lostMfa,lostPassword,ownership,changeEmail,changeEmailAuth,changeEmailVerify,changeEmailSuccess},startLogin,startLegacyLogin,handle,reset};
 };
