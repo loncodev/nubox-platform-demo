@@ -6,13 +6,13 @@ Prototipo estático e independiente presentado como ejercicio de entrevista. **N
 
 Abrir `index.html` en cualquier navegador moderno. No necesita backend ni credenciales.
 
-## Recorridos para la demo
+## Recorridos disponibles
 
-- **Motivos y fecha de migración:** desde la pantalla inicial, abrir «¿Por qué cambiamos y cómo prepararme?». No hay fecha definida: cada cohorte tendrá su plazo tras validar la preparación y recuperación.
-- **Primera entrada:** «Ingreso» → «Configura tu segundo factor» (aplicación autenticadora aún sin emparejamiento real) → código ficticio **482915** → consentimientos → plataforma.
-- **Acceso habitual:** «Cerrar sesión» y volver a ingresar: si el segundo factor ya está configurado se pide únicamente la verificación; si se marcó «Confiar en este dispositivo», se muestra el comportamiento ilustrativo de confianza. Los consentimientos no se vuelven a solicitar.
-- **Migración RUT:** «Antes ingresaba con RUT» → asociar correo → código ficticio de verificación de correo **482915** → **verificación de titularidad de la cuenta antigua** → configuración MFA → acceso. La verificación del nuevo correo por sí sola no habilita vincular la identidad anterior.
-- **Correo compartido (caso de excepción):** «Antes ingresaba con RUT» → «Ver ejemplo de correo compartido» → Continuar → advertencia de duplicado → «Usar correo individual de ejemplo» → verificar correo y titularidad → activar MFA. No se fusionan cuentas.
+- **Pantalla inicial:** «Ingresar con passkey», «Ingresar con correo» o «Ingresar con RUT». La opción de RUT sigue disponible mientras el usuario actualiza su cuenta.
+- **Primera entrada:** «Ingresar con correo» o «Ingresar con RUT» → «Protege tu cuenta» → elegir **passkey** o **aplicación autenticadora (TOTP)** → consentimientos → plataforma. Con TOTP se introduce el código guiado **482915**. Con passkey se sigue una confirmación de interfaz, sin activar credenciales de dispositivo.
+- **Acceso habitual:** cerrar sesión y regresar con passkey directamente, sin escribir identificador, o con correo y TOTP. Si ambos métodos están configurados se muestra un selector. El registro y estado de los métodos se conservan durante la sesión del navegador, no en servidores.
+- **Migración RUT:** «Ingresar con RUT» → escribir RUT → «Actualizar mi acceso» → verificar correo con código **482915** → confirmar titularidad de la cuenta anterior → elegir passkey o TOTP. Se conservan empresas y permisos.
+- **Correo compartido:** «Ingresar con RUT» → «Actualizar mi acceso» → «¿Tu correo está compartido?» → continuar → elegir otro correo y completar las verificaciones. No se fusionan cuentas.
 - **Cambiar contraseña Nubox:** «Seguridad» → «Cambiar contraseña» → revalidación ficticia MFA → confirmación y revocación simulada de sesiones.
 - **Cambiar correo:** «Seguridad» → «Cambiar correo de ingreso» → código ficticio MFA **482915** → verificación del nuevo correo con código **742618** → confirmación. Conserva identidad, empresas y autorizaciones.
 - **Excepciones:** «Recuperar acceso» permite mostrar los escenarios de correo inaccesible, dispositivo MFA perdido y contraseña Nubox olvidada. Su tratamiento propone verificación asistida; no simula accesos sin validar la identidad.
@@ -21,13 +21,15 @@ Abrir `index.html` en cualquier navegador moderno. No necesita backend ni creden
 
 ## Seguridad y alcance
 
-No captura contraseñas, no emite solicitudes a sistemas externos ni guarda datos de usuarios. Todos los flujos de autenticación, consentimiento y acceso son ficticios; los mecanismos de seguridad definitivos tendrían que ser aprobados por el área responsable.
+La interfaz permite recorrer alta e ingreso con passkey y TOTP, pero **NO implementa WebAuthn ni genera/valida códigos TOTP reales**. No hay servidor, emisión de desafíos, almacenamiento seguro de credenciales, verificación criptográfica ni autenticación verdadera. «Confirmar passkey» únicamente avanza una secuencia de navegación; **no registra una llave real ni invoca un autenticador del sistema**. El código TOTP `482915` es fijo. Para llevarlos a producción hacen falta un servicio de identidad con verificación del lado del servidor, un flujo de inscripción y recuperación seguro, y revisión de Seguridad.
+
+No captures contraseñas, datos bancarios ni información personal real en el prototipo. Los estados de inicio, facturación y permisos solo se modifican en memoria; ninguna acción altera cuentas Nubox.
 
 ## Navegación y alcance (octubre 2026)
 
 **Primer proyecto del business case: migración de RUT a correo único verificado + MFA, reutilizando autenticación y Perfilamento.**
-- Login por correo y transición desde RUT
-- Verificación MFA, dispositivo confiable y acceso a empresa/producto
+- Login por passkey, correo o RUT durante la transición
+- Alta de passkey o TOTP como métodos alternativos y acceso a empresa/producto
 - Seguridad de cuenta, cambio de contraseña con revalidación de código y sesiones simuladas
 
 **Visión futura de Plataforma Nubox: fuera del compromiso P0.**
