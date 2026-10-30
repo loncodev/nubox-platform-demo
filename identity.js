@@ -129,36 +129,45 @@ window.NuboxIdentity=function(api){
     '<p>Por seguridad, los cambios de correo deben notificarse al contacto anterior. </p>'+
     '<button class="btn-inline primary-inline" data-action="page" data-page="security">Ver Seguridad de cuenta</button></div>')
   }
-  function requestedPasskeySetup(){if(state.pendingPasskeySetup&&!state.passkeyConfigured){state.pendingPasskeySetup=false;return 'passkeySetup'}return null}
+  function target(){return state.pendingEnrollmentMethod==='totp'?'enrollMfa':'passkeySetup'}
+  function requestEnrollment(method){state.pendingEnrollmentMethod=method;state.pendingPasskeySetup=false;if(state.secondFactorVerified)return target();if(state.mfaConfigured)return 'enrollmentTotpChallenge';if(state.passkeyConfigured)return 'enrollmentPasskeyChallenge';return 'enrollmentIdentity'}
+  function requestedPasskeySetup(){return state.pendingPasskeySetup&&!state.passkeyConfigured?requestEnrollment('passkey'):null}
   function startLegacyLogin(){
-    if(state.pendingPasskeySetup&&!state.passkeyConfigured){
-      if(state.mfaConfigured&&!state.trust)return 'mfa';
-      return requestedPasskeySetup()||'passkeySetup';
-    }
-    if(!state.mfaConfigured&&!state.passkeyConfigured)return 'securityMethod';
-    if(state.mfaConfigured&&state.passkeyConfigured)return state.trust?'home':'chooseLoginFactor';
-    if(state.mfaConfigured)return state.trust?'home':'mfa';
-    return 'passkeySignIn';
+    state.loginMethod='rut';state.secondFactorVerified=false;
+    if(state.pendingPasskeySetup&&!state.passkeyConfigured)return state.mfaConfigured?'mfa':requestedPasskeySetup();
+    if(state.mfaConfigured&&state.passkeyConfigured)return 'chooseLoginFactor';
+    if(state.mfaConfigured)return 'mfa';
+    if(state.mfaRequired)return state.passkeyConfigured?'passkeySignIn':'securityMethod';
+    return 'home';
   }
-  function startGoogleLogin(){return requestedPasskeySetup()||'home'}
-  function afterMfa(){return requestedPasskeySetup()||'home'}
+  function startGoogleLogin(){
+    state.loginMethod='google';state.secondFactorVerified=false;
+    if(state.pendingPasskeySetup&&!state.passkeyConfigured)return state.mfaConfigured?'mfa':requestedPasskeySetup();
+    if(state.mfaRequired){
+      if(state.mfaConfigured&&state.passkeyConfigured)return 'chooseLoginFactor';
+      if(state.mfaConfigured)return 'mfa';
+      return state.passkeyConfigured?'passkeySignIn':'securityMethod';
+    }
+    return 'home';
+  }
+  function afterMfa(){state.secondFactorVerified=true;return requestedPasskeySetup()||'home'}
   function handle(a){
     if(a==='securityMethod')setScreen('securityMethod');
-    else if(a==='startPasskeySetup')setScreen('passkeySetup');
+    else if(a==='startPasskeySetup')setScreen(requestEnrollment('passkey'))
     else if(a==='preparePasskey')setScreen('passkeyConfirm');
-    else if(a==='confirmPasskeySetup'){state.passkeyConfigured=true;state.pendingPasskeySetup=false;const next=state.enrollmentReturnTo==='security'?'security':afterMfa();state.enrollmentReturnTo='';setScreen(next);toast('El recorrido de passkey quedó preparado.')}
+    else if(a==='confirmPasskeySetup'){state.passkeyConfigured=true;state.pendingPasskeySetup=false;state.pendingEnrollmentMethod='';const next=state.enrollmentReturnTo==='security'?'security':'home';state.enrollmentReturnTo='';setScreen(next);toast('Passkey configurada.')}
     else if(a==='beginPasskeyLogin'){state.pendingPasskeySetup=!state.passkeyConfigured;setScreen(state.passkeyConfigured?'passkeySignIn':'passkeyUnavailable')}
     else if(a==='confirmPasskeySignIn'){if(!state.passkeyConfigured){setScreen('passkeyUnavailable')}else setScreen(afterMfa())}
-    else if(a==='startTotpSetup'){state.pendingPasskeySetup=false;setScreen('enrollMfa')}
-    else if(a==='startTotpLogin'){state.pendingPasskeySetup=false;setScreen(state.mfaConfigured?'mfa':'enrollMfa')}
+    else if(a==='startTotpSetup')setScreen(requestEnrollment('totp'))
+    else if(a==='startTotpLogin'){state.pendingPasskeySetup=false;setScreen(state.mfaConfigured?'mfa':'securityMethod')}
     else if(a==='startEnrollment')setScreen('verifyEnrollment');
     else if(a==='finishEnrollment'){
       if((document.getElementById('setupOtp')?.value||'')!==mfaCode)toast('Introduce el código 482915.');
-      else{state.mfaConfigured=true;state.trust=!!document.getElementById('setupTrust')?.checked;const next=state.enrollmentReturnTo==='security'?'security':afterMfa();state.enrollmentReturnTo='';setScreen(next);toast('Segundo factor configurado correctamente.')}
+      else{state.mfaConfigured=true;state.trust=false;state.pendingEnrollmentMethod='';const next=state.enrollmentReturnTo==='security'?'security':'home';state.enrollmentReturnTo='';setScreen(next);toast('TOTP configurado correctamente.')}
     }
     else if(a==='verifymfa'){
       if((document.getElementById('otp')?.value||'')!==mfaCode)toast('Introduce el código 482915.');
-      else{state.trust=!!document.getElementById('trust')?.checked;setScreen(afterMfa())}
+      else{state.trust=false;setScreen(afterMfa())}
     }
     else if(a==='lostEmail'||a==='noaccess')setScreen('lostEmail');
     else if(a==='lostMfa')setScreen('lostMfa');
@@ -177,6 +186,6 @@ window.NuboxIdentity=function(api){
     else return false;
     return true;
   }
-  function reset(){state.mfaConfigured=false;state.passkeyConfigured=false;state.pendingPasskeySetup=false;state.enrollmentReturnTo='';state.pendingEmail='';state.previousEmail=''}
+  function reset(){state.mfaConfigured=false;state.passkeyConfigured=false;state.pendingPasskeySetup=false;state.secondFactorVerified=false;state.pendingEnrollmentMethod='';state.loginMethod='';state.enrollmentReturnTo='';state.pendingEmail='';state.previousEmail=''}
   return {screens:{securityMethod,passkeySetup,passkeyConfirm,passkeySignIn,passkeyUnavailable,chooseLoginFactor,enrollMfa,verifyEnrollment,mfa,recovery,lostEmail,lostMfa,lostPassword,changeEmail,changeEmailAuth,changeEmailVerify,changeEmailSuccess},startGoogleLogin,startLegacyLogin,handle,reset};
 };
