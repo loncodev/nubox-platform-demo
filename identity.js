@@ -74,15 +74,15 @@ window.NuboxIdentity=function(api){
     '<h2>Confirma TOTP '+help('mfa','Configuración inicial del factor')+'</h2><p class="lead">Introduce el código de seis dígitos para completar la configuración.</p>'+
     '<label class="field" for="setupOtp">Código de verificación</label><input class="text-input code" id="setupOtp" maxlength="6" inputmode="numeric" autocomplete="off" placeholder="••••••">'+
     '<div class="info">Código de verificación: <strong>'+mfaCode+'</strong>.</div>'+
-    '<label class="toggle-row"><input type="checkbox" id="setupTrust"><span><strong style="display:block;font-size:13px">Confiar en este dispositivo</strong><small class="tiny">Durante 30 días '+help('trust','¿Qué significa confiar en el equipo?')+'</small></span></label>'+
+
     '<button class="action" data-action="finishEnrollment">Activar segundo factor</button><button class="linkbtn" data-action="lostMfa">¿No puedo usar el segundo factor?</button>'
   )}
   function mfa(){return wrap(
     aside('Ingreso habitual','Un acceso protegido.','Tu factor ya está configurado. Ahora solo comprobamos tu identidad antes de abrir la plataforma.'),
-    '<h2>Verifica tu código TOTP '+help('mfalogin','Sobre el ingreso habitual')+'</h2><p class="lead">Después de ingresar con RUT y contraseña, introduce el código de tu aplicación autenticadora.</p>'+
+    '<h2>Verifica tu código TOTP '+help('mfalogin','Sobre el ingreso habitual')+'</h2><p class="lead">Introduce el código de tu aplicación autenticadora.</p>'+
     '<label class="field" for="otp">Código de tu segundo factor</label><input class="text-input code" id="otp" maxlength="6" inputmode="numeric" autocomplete="off" placeholder="••••••">'+
     '<div class="info">Código de verificación: <strong>'+mfaCode+'</strong>.</div>'+
-    '<label class="toggle-row"><input type="checkbox" id="trust" '+(state.trust?'checked':'')+'><span><strong style="display:block;font-size:13px">Confiar en este dispositivo</strong><small class="tiny">Hasta 30 días '+help('trust','Sobre los dispositivos confiables')+'</small></span></label>'+
+
     '<button class="action" data-action="verifymfa">Verificar y continuar</button>'+
     '<div class="aux"><button class="linkbtn" data-action="lostMfa">Perdí mi segundo factor</button><button class="linkbtn" data-action="lostEmail">No tengo acceso a mi correo</button></div>'
   )}
@@ -107,7 +107,7 @@ window.NuboxIdentity=function(api){
     )
   }
   function lostEmail(){return recoverDetails('email')}
-  function lostMfa(){return recoverDetails('mfa')}
+  function lostMfa(){return wrap(aside('Recuperación','Recupera tu acceso con seguridad.','Utiliza un método que ya registraste o solicita ayuda.'),'<h2>Perdí mi segundo factor</h2><p class="lead">Si tienes otra forma de verificarte, puedes utilizarla.</p>'+(state.passkeyConfigured?'<button class="action" data-action="beginPasskeyLogin">Ingresar con passkey</button>':'')+(state.mfaConfigured?'<button class="action secondary" data-action="startTotpLogin">Usar mi aplicación autenticadora</button>':'')+'<div class="panel"><h3>Recuperación asistida</h3><p>Si no puedes utilizar ninguno de tus métodos, Soporte deberá comprobar tu identidad antes de restablecer el acceso.</p><button class="btn-inline" data-action="support">Contactar a Soporte</button></div><div class="aux"><button class="linkbtn" data-action="login">Volver al ingreso</button></div>')}
   function lostPassword(){return recoverDetails('password')}
   function changeEmail(){return header('Mi cuenta · Seguridad','Actualizar correo de contacto',
     'El nuevo correo se utilizará para contactarte. No cambia tus métodos de ingreso.',
