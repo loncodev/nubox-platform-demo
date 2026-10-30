@@ -31,6 +31,10 @@ Cuando están configurados TOTP y passkey, ambos permanecen disponibles, sin exi
 
 El estado solo existe en memoria: **recargar la página reinicia las credenciales ficticias**. El parámetro `escenario=mfa-obligatorio` modifica únicamente el comportamiento ilustrativo del prototipo, no una política ni un usuario real.
 
+## Pruebas de regresión
+
+Ejecutar `node tests/auth-flows.test.cjs` desde la raíz del repositorio. Las diez pruebas automatizadas cubren los siete flujos, el registro de un método adicional sin retirar el anterior, la política MFA por cuenta y las alternativas de recuperación. No sustituyen las pruebas WebAuthn, OAuth, backend o TOTP real.
+
 ## Seguridad y alcance
 
 La interfaz permite recorrer alta e ingreso con passkey y TOTP, pero **NO implementa WebAuthn ni genera/valida códigos TOTP reales**. No hay servidor, emisión de desafíos, almacenamiento seguro de credenciales, verificación criptográfica ni autenticación verdadera. «Confirmar passkey» únicamente avanza una secuencia de navegación; la pantalla de comprobación adicional de titularidad también es ilustrativa; **no registra una llave real ni invoca un autenticador del sistema**. El código TOTP `482915` es fijo. Para llevarlos a producción hacen falta un servicio de identidad con verificación del lado del servidor, un flujo de inscripción y recuperación seguro, y revisión de Seguridad.
