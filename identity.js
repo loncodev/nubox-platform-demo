@@ -12,6 +12,19 @@ window.NuboxIdentity=function(api){
     '<div class="panel"><h3>Aplicación autenticadora (TOTP)</h3><p>Después del RUT y la contraseña, utiliza el código temporal de seis dígitos generado por tu aplicación autenticadora.</p><button class="action secondary" data-action="startTotpSetup">Configurar TOTP</button></div>'+
     '<button class="linkbtn" data-action="lostMfa">¿Necesitas ayuda para proteger tu cuenta?</button>'
   )}
+  function enrollmentIdentity(){return wrap(aside('Seguridad','Comprueba tu identidad.','Antes de registrar un método nuevo debemos confirmar que esta cuenta te pertenece.'),
+    '<h2>Confirma tu identidad</h2><p class="lead">Necesitas una comprobación adicional de titularidad antes de activar tu nuevo método.</p>'+
+    '<div class="panel"><h3>Verificación de seguridad</h3><p>Continúa con la comprobación de identidad para poder registrar el método elegido.</p><button class="action" data-action="confirmEnrollmentIdentity">Continuar con la verificación</button></div>'+
+    '<div class="aux"><button class="linkbtn" data-action="lostMfa">Necesito ayuda para verificarme</button></div>')}
+  function enrollmentTotpChallenge(){return wrap(aside('Seguridad','Verifica tu método existente.','Antes de registrar otra credencial comprueba tu segundo factor.'),
+    '<h2>Verifica con TOTP</h2><p class="lead">Introduce el código de tu aplicación autenticadora antes de añadir otro método.</p>'+
+    '<label class="field" for="enrollmentOtp">Código TOTP</label><input class="text-input code" id="enrollmentOtp" maxlength="6" inputmode="numeric" placeholder="••••••">'+
+    '<div class="info">Código de verificación: <strong>'+mfaCode+'</strong>.</div><button class="action" data-action="confirmEnrollmentTotp">Verificar y continuar</button>'+
+    '<div class="aux"><button class="linkbtn" data-action="lostMfa">No puedo usar mi segundo factor</button></div>')}
+  function enrollmentPasskeyChallenge(){return wrap(aside('Seguridad','Verifica tu passkey.','Autoriza el registro de un método adicional con tu passkey.'),
+    '<h2>Confirma tu passkey</h2><p class="lead">Usa la passkey que ya registraste para verificar tu identidad.</p>'+
+    '<button class="action" data-action="confirmEnrollmentPasskey">Continuar con passkey</button>'+
+    '<div class="aux"><button class="linkbtn" data-action="lostMfa">No puedo usar mi passkey</button></div>')}
   function passkeySetup(){return wrap(
     aside('Passkey','Un ingreso más sencillo.','Usa el método de desbloqueo de tu dispositivo para acceder a Nubox.'),
     '<h2>Configura tu passkey</h2><p class="lead">En un ingreso real utilizarías la huella, el rostro o el PIN del dispositivo.</p>'+ 
@@ -160,6 +173,12 @@ window.NuboxIdentity=function(api){
     else if(a==='confirmPasskeySignIn'){if(!state.passkeyConfigured){setScreen('passkeyUnavailable')}else setScreen(afterMfa())}
     else if(a==='startTotpSetup')setScreen(requestEnrollment('totp'))
     else if(a==='startTotpLogin'){state.pendingPasskeySetup=false;setScreen(state.mfaConfigured?'mfa':'securityMethod')}
+    else if(a==='confirmEnrollmentIdentity'){state.secondFactorVerified=true;setScreen(target())}
+    else if(a==='confirmEnrollmentTotp'){
+      if((document.getElementById('enrollmentOtp')?.value||'')!==mfaCode)toast('Introduce el código 482915.');
+      else{state.secondFactorVerified=true;setScreen(target())}
+    }
+    else if(a==='confirmEnrollmentPasskey'){state.secondFactorVerified=true;setScreen(target())}
     else if(a==='startEnrollment')setScreen('verifyEnrollment');
     else if(a==='finishEnrollment'){
       if((document.getElementById('setupOtp')?.value||'')!==mfaCode)toast('Introduce el código 482915.');
@@ -187,5 +206,5 @@ window.NuboxIdentity=function(api){
     return true;
   }
   function reset(){state.mfaConfigured=false;state.passkeyConfigured=false;state.pendingPasskeySetup=false;state.secondFactorVerified=false;state.pendingEnrollmentMethod='';state.loginMethod='';state.enrollmentReturnTo='';state.pendingEmail='';state.previousEmail=''}
-  return {screens:{securityMethod,passkeySetup,passkeyConfirm,passkeySignIn,passkeyUnavailable,chooseLoginFactor,enrollMfa,verifyEnrollment,mfa,recovery,lostEmail,lostMfa,lostPassword,changeEmail,changeEmailAuth,changeEmailVerify,changeEmailSuccess},startGoogleLogin,startLegacyLogin,handle,reset};
+  return {screens:{securityMethod,enrollmentIdentity,enrollmentTotpChallenge,enrollmentPasskeyChallenge,passkeySetup,passkeyConfirm,passkeySignIn,passkeyUnavailable,chooseLoginFactor,enrollMfa,verifyEnrollment,mfa,recovery,lostEmail,lostMfa,lostPassword,changeEmail,changeEmailAuth,changeEmailVerify,changeEmailSuccess},startGoogleLogin,startLegacyLogin,handle,reset};
 };
