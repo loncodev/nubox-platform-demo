@@ -6,8 +6,8 @@ window.NuboxIdentity=function(api){
   function smallNote(){return ''}
   function header(eyebrow,title,subtitle,content){const k=title==='Actualizar correo de contacto'?'emailchange':title==='Verifica tu nuevo correo'?'emailcode':title==='Comprueba que eres tú'?'mfa':null;return shell('<div class="page"><div class="eyebrow">'+eyebrow+'</div><h1>'+title+(k?' '+help(k,'Más información sobre este paso'):'')+'</h1><p class="sub">'+subtitle+'</p>'+content+smallNote()+'</div>')}
   function securityMethod(){return wrap(
-    aside('Seguridad del acceso','Protege tu ingreso con RUT.','Puedes utilizar una aplicación autenticadora TOTP o una passkey.'),
-    '<h2>Protege tu ingreso con RUT</h2><p class="lead">Selecciona un método de seguridad. Configura TOTP con una aplicación autenticadora o usa una passkey. Solo necesitas uno.</p>'+ 
+    aside('Seguridad del acceso','Activa la seguridad de tu cuenta.','Puedes utilizar una aplicación autenticadora TOTP o una passkey.'),
+    '<h2>Activa la seguridad de tu cuenta</h2><p class="lead">Selecciona un método de seguridad. Configura TOTP con una aplicación autenticadora o usa una passkey. Solo necesitas uno.</p>'+ 
     '<div class="panel"><h3>Passkey <span class="pill">Recomendado</span></h3><p>Confirma con huella, rostro o PIN del dispositivo en los siguientes ingresos.</p><button class="action" data-action="startPasskeySetup">Configurar passkey</button></div>'+
     '<div class="panel"><h3>Aplicación autenticadora (TOTP)</h3><p>Después del RUT y la contraseña, utiliza el código temporal de seis dígitos generado por tu aplicación autenticadora.</p><button class="action secondary" data-action="startTotpSetup">Configurar TOTP</button></div>'+
     '<button class="linkbtn" data-action="lostMfa">¿Necesitas ayuda para proteger tu cuenta?</button>'
