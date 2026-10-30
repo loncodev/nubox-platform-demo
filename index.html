@@ -26,11 +26,11 @@
 @media(hover:hover) and (pointer:fine){.help-wrap:hover .help-popover{opacity:1;visibility:visible;transform:translateY(0);pointer-events:auto}}
 @media(max-width:600px){.help-wrap .help-popover{position:fixed;left:16px;right:16px;top:auto;bottom:18px;width:auto;max-width:none;z-index:260;font-size:14px;line-height:1.5;padding:16px}}
 
-/* Herramientas de presentación discretas, sin cabecera interpuesta */
-.prototype-utilities{position:fixed;z-index:180;right:14px;bottom:12px;display:flex;align-items:center;gap:11px;padding:7px 10px;background:rgba(255,255,255,.94);color:#8390a5;border:1px solid #e4e9f3;border-radius:999px;box-shadow:0 4px 18px rgba(18,35,68,.05);font-size:10px;letter-spacing:.01em}
-.prototype-utilities button{border:0;border-left:1px solid #d8e1ee;padding:2px 2px 2px 10px;background:none;color:#61748f;font-size:11px;font-weight:600}
+/* Selector de escenarios exclusivo del prototipo, separado de Nubox */
+.prototype-utilities{position:fixed;z-index:180;left:50%;bottom:14px;transform:translateX(-50%);display:flex;align-items:center;flex-wrap:wrap;justify-content:center;gap:8px;padding:9px 12px;background:rgba(255,255,255,.98);color:#53637c;border:1px solid #d7e1ef;border-radius:13px;box-shadow:0 8px 32px rgba(18,35,68,.15);font-size:12px;letter-spacing:.01em;max-width:calc(100vw - 24px)}
+.prototype-utilities button{border:1px solid #ccd9ec;border-radius:7px;padding:7px 9px;background:#fff;color:#38516f;font-size:12px;font-weight:650;white-space:nowrap}.prototype-utilities button[aria-pressed="true"]{background:#202a44;color:white;border-color:#202a44}.prototype-utilities .scenario-label{font-weight:800;color:#42526a;white-space:nowrap}.prototype-utilities #scenario-detail{flex-basis:100%;text-align:center;font-size:11px;color:#62738b}
 .prototype-utilities button:hover,.prototype-utilities button:focus-visible{color:#2354a3}
-@media(max-width:600px){.prototype-utilities{right:8px;bottom:7px;font-size:10px;padding:6px 9px}}
+@media(max-width:600px){.prototype-utilities{bottom:7px;gap:5px;padding:8px 9px}.prototype-utilities button{font-size:11px;padding:7px}.prototype-utilities .scenario-label{flex-basis:100%;text-align:center}.prototype-utilities #scenario-detail{font-size:10px}}
 
 .member-directory-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
 .member-directory-heading h3{margin:0}.member-directory-heading p{margin:4px 0 0}
@@ -48,7 +48,7 @@
 </style>
 </head>
 <body>
-<div class="prototype-utilities"><button id="reset" type="button" aria-label="Reiniciar recorrido">Reiniciar ↻</button></div>
+<div class="prototype-utilities" role="group" aria-label="Selector de escenarios del prototipo"><span class="scenario-label">Escenario de prueba</span><button id="scenario-normal" type="button" aria-pressed="false">Ingreso habitual</button><button id="scenario-required" type="button" aria-pressed="false">MFA obligatorio</button><button id="reset" type="button" aria-label="Reiniciar recorrido">Reiniciar ↻</button><span id="scenario-detail" aria-live="polite"></span></div>
 <main id="app"></main>
 <script src="extras.js"></script>
 <script src="identity.js?v=2321bfd7"></script>
@@ -143,7 +143,7 @@ function securityMfa(){return shell('<div class="page"><div class="eyebrow">Mi c
  (state.passkeyConfigured?'<p>Confirmar con passkey.</p><button class="btn-inline primary-inline" data-action="finishSecurityPasskey">Verificar con passkey</button>':'')+
  (state.mfaConfigured?'<p>O introducir el código de tu aplicación autenticadora.</p><label class="field" for="securityotp">Código TOTP</label><input class="text-input code" id="securityotp" maxlength="6" inputmode="numeric" autocomplete="off" placeholder="••••••"><p class="tiny">Código para este recorrido: <strong>482915</strong></p><button class="btn-inline" data-action="finishSecurityMfa">Verificar TOTP</button>':'')+
  '<div class="extra-actions"><button class="btn-inline" data-action="page" data-page="security">Cancelar</button></div></div></div>')}
-function render(){const outputs={login,googleAccess,rutAccess,home,products,security,account,product,changePassword,changePasswordMfa,passwordChanged,sessions,securityMfa,...extra.screens,...identity.screens};app.innerHTML=(outputs[state.screen]||login)();attach();}
+function render(){const outputs={login,googleAccess,rutAccess,home,products,security,account,product,changePassword,changePasswordMfa,passwordChanged,sessions,securityMfa,...extra.screens,...identity.screens};app.innerHTML=(outputs[state.screen]||login)();attach();syncScenarioControls();}
 function attach(){const rutForm=document.querySelector('#rutloginform');if(rutForm)rutForm.addEventListener('submit',e=>{e.preventDefault();const rut=document.getElementById('rutlogin').value.trim();if(!rut)return toast('Ingresa tu RUT para continuar.');state.rut=rut;setScreen(identity.startLegacyLogin())});document.querySelectorAll('[data-action]').forEach(el=>el.addEventListener('click',e=>{const a=el.dataset.action;if(identity.handle(a,el))return;
 if(a==='rut'){if(state.screen!=='passkeyUnavailable')state.pendingPasskeySetup=false;setScreen('rutAccess')}
 else if(a==='google'){if(state.screen!=='passkeyUnavailable')state.pendingPasskeySetup=false;setScreen('googleAccess')}
@@ -159,7 +159,9 @@ else if(a==='addPasskey'){state.enrollmentReturnTo='security';state.secondFactor
 else if(extra.handle(a,el)){}else if(a==='none')toast('No hay contenido adicional disponible para este producto.');
 }));}
 function reset(){state.screen='login';state.email='andres@empresa.cl';state.rut='';state.trust=false;state.secondFactorVerified=false;state.pendingEnrollmentMethod='';state.loginMethod='';state.company=0;state.chosenProduct='CO';state.menuOpen=false;state.migrating=false;state.passwordChanged=false;state.sessionsClosed=false;identity.reset();extra.reset();render()}
-document.getElementById('reset').addEventListener('click',reset);render();
+function syncScenarioControls(){document.getElementById('scenario-normal').setAttribute('aria-pressed',String(!state.mfaRequired));document.getElementById('scenario-required').setAttribute('aria-pressed',String(state.mfaRequired));document.getElementById('scenario-detail').textContent=state.mfaRequired?'Después de RUT + contraseña: activar MFA (TOTP o passkey).':'Después de RUT + contraseña: acceso directo a la plataforma.'}
+function selectScenario(required){state.mfaRequired=required;const url=new URL(location.href);if(required)url.searchParams.set('escenario','mfa-obligatorio');else url.searchParams.delete('escenario');history.replaceState(null,'',url);reset()}
+document.getElementById('scenario-normal').addEventListener('click',()=>selectScenario(false));document.getElementById('scenario-required').addEventListener('click',()=>selectScenario(true));document.getElementById('reset').addEventListener('click',reset);render();
 })();
 </script>
 </body>
