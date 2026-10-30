@@ -13,8 +13,8 @@ window.NuboxIdentity=function(api){
     '<button class="linkbtn" data-action="lostMfa">¿Necesitas ayuda para proteger tu cuenta?</button>'
   )}
   function enrollmentIdentity(){return wrap(aside('Seguridad','Comprueba tu identidad.','Antes de registrar un método nuevo debemos confirmar que esta cuenta te pertenece.'),
-    '<h2>Confirma tu identidad</h2><p class="lead">Necesitas una comprobación adicional de titularidad antes de activar tu nuevo método.</p>'+
-    '<div class="panel"><h3>Verificación de seguridad</h3><p>Continúa con la comprobación de identidad para poder registrar el método elegido.</p><button class="action" data-action="confirmEnrollmentIdentity">Continuar con la verificación</button></div>'+
+    '<h2>Confirma tu identidad</h2><p class="lead">Antes de registrar un nuevo método se requiere una comprobación segura de titularidad. El procedimiento definitivo está pendiente de aprobación por Seguridad.</p>'+
+    '<div class="panel"><h3>Verificación de seguridad · Simulación</h3><p>Este prototipo solo representa el resultado de una comprobación adicional; no verifica realmente la identidad.</p><button class="action" data-action="confirmEnrollmentIdentity">Simular verificación aprobada</button></div>'+
     '<div class="aux"><button class="linkbtn" data-action="lostMfa">Necesito ayuda para verificarme</button></div>')}
   function enrollmentTotpChallenge(){return wrap(aside('Seguridad','Verifica tu método existente.','Antes de registrar otra credencial comprueba tu segundo factor.'),
     '<h2>Verifica con TOTP</h2><p class="lead">Introduce el código de tu aplicación autenticadora antes de añadir otro método.</p>'+
