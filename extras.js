@@ -5,7 +5,7 @@ window.NuboxExtras=function(api){
  const codes=Object.keys(productInfo);
  const tag=help('future','Sobre la disponibilidad de esta función');
  const intro=''
- function active(code){return companies[state.company].products.includes(code)||(purchased[state.company]||[]).includes(code)}
+ function active(code){return (state.scenario==='no-migrado'||code==='CO')&&(companies[state.company].products.includes(code)||(purchased[state.company]||[]).includes(code))}
  function frame(kicker,title,body){return shell('<div class="page"><div class="eyebrow">'+kicker+'</div><h1>'+title+'</h1><p class="sub">'+escape(companies[state.company].name)+' · '+tag+'</p>'+body+'</div>')}
  function catalog(){return frame('Plataforma · Oferta multiproducto','Explorar planes',
  '<p class="tiny">Los valores y las condiciones se confirmarán antes de contratar.</p><div class="grid-products" style="margin-top:22px">'+codes.map(code=>'<div class="panel" style="margin:0"><h3>'+escape(productInfo[code].name)+' <span class="pill neutral">'+code+'</span></h3><p>'+(active(code)?'Producto disponible en tu cuenta':'Producto aún no contratado')+'</p><p><strong>'+(active(code)?'Activo':'Precio y condiciones por definir')+'</strong></p><button class="btn-inline '+(active(code)?'':'primary-inline')+'" data-action="'+(active(code)?'page':'extra-offer')+'" data-page="subscriptions" data-code="'+code+'">'+(active(code)?'Ver mi suscripción':'Ver oferta →')+'</button></div>').join('')+'</div>')}
