@@ -8,19 +8,32 @@ Abrir `index.html` en cualquier navegador moderno. No necesita backend ni creden
 
 ## Recorridos disponibles
 
-- **Ingreso a Nubox:** Passkey, Google o RUT. **No existe autenticación nativa por correo** en esta propuesta.
-- **Ingreso con Google:** «Continuar con Google» → confirmar la elección de Google → plataforma. La interfaz no ejecuta OAuth real.
-- **Primer ingreso con RUT:** RUT y contraseña existente → elegir **TOTP o passkey** → configurar un método → plataforma. No se requiere correo de ingreso ni configurar ambos métodos.
-- **Passkey ya registrada:** «Ingresar con passkey» → confirmar con el dispositivo → plataforma.
-- **Passkey sin registrar:** elegir «Ingresar con passkey» → «Aún no tienes una passkey» → autenticarse con **Google o RUT** → configurar passkey → plataforma. Si ya existe TOTP, se verifica cuando corresponde antes de registrar un método adicional.
-- **Siguientes ingresos con RUT y TOTP:** RUT y contraseña → **verificar TOTP** con código de seis dígitos → plataforma (salvo dispositivo confiable). También se puede configurar TOTP desde **Seguridad**. No se envían códigos al correo para MFA.
-- **Correo de contacto:** se puede actualizar en Seguridad y verificar como dato de contacto; **no es un identificador de ingreso**.
-- **Recuperación:** ayuda ante pérdida de autenticador, correo inaccesible o contraseña olvidada, con comprobación de identidad.
-- **Otros apartados:** productos, empresas, suscripciones, pagos y usuarios por empresa permanecen como navegación ilustrativa.
+**Pantalla inicial:** Passkey, Google o RUT. No hay ingreso con correo; el correo de contacto no se transforma en identificador de autenticación.
+
+1. **RUT sin obligación de MFA:** RUT + contraseña existente → plataforma. El usuario puede configurar TOTP o passkey desde **Seguridad**, de forma voluntaria.
+2. **RUT con MFA obligatorio y sin método:** RUT + contraseña → elegir passkey o TOTP → comprobar titularidad antes de registrar el método → plataforma.
+3. **RUT con TOTP registrado:** RUT + contraseña → código TOTP → plataforma. No se envía un código al correo.
+4. **Passkey registrada:** botón passkey → confirmar uso de la credencial → plataforma, sin RUT, contraseña ni TOTP adicional.
+5. **Registrar passkey:** desde RUT, Google o Seguridad. Si ya existe TOTP, se exige ese código antes de registrar la passkey; si no hay factores registrados, se representa una comprobación adicional de identidad. Registrar passkey **no elimina TOTP**.
+6. **Google:** el ingreso existente continúa sin cambios cuando MFA no es obligatorio. Si lo es, el prototipo no presume garantías de MFA del proveedor y exige un factor local; en producción hay que verificar la información que entrega la integración.
+7. **Recuperación:** usar otro factor ya registrado, si está disponible, o recurrir a Soporte con comprobación de identidad. No se permite recuperar una cuenta únicamente con el RUT o el correo.
+
+Cuando están configurados TOTP y passkey, ambos permanecen disponibles, sin exigirlos juntos en el ingreso normal. La exención del segundo factor por un dispositivo de confianza **no está habilitada**.
+
+## Cómo comprobar los estados
+
+- **Ingreso sin MFA obligatorio:** abrir [el prototipo normal](https://loncodev.github.io/nubox-platform-demo/) → RUT → ingresar → plataforma.
+- **MFA obligatorio:** abrir [el escenario con MFA obligatorio](https://loncodev.github.io/nubox-platform-demo/?escenario=mfa-obligatorio) → RUT → ingresar → elegir TOTP o passkey.
+- **Registrar TOTP voluntariamente:** ingresar con RUT en el escenario normal → Seguridad → Configurar TOTP.
+- **Añadir passkey conservando TOTP:** registrar TOTP → cerrar sesión → ingresar con RUT + TOTP → Seguridad → Configurar passkey. Se exige revalidar el factor antes de registrar un método adicional.
+- **Ingreso con Google:** opción Google → continuar. Se representa la navegación, no OAuth.
+- **Código fijo TOTP del prototipo:** `482915`.
+
+El estado solo existe en memoria: **recargar la página reinicia las credenciales ficticias**. El parámetro `escenario=mfa-obligatorio` modifica únicamente el comportamiento ilustrativo del prototipo, no una política ni un usuario real.
 
 ## Seguridad y alcance
 
-La interfaz permite recorrer alta e ingreso con passkey y TOTP, pero **NO implementa WebAuthn ni genera/valida códigos TOTP reales**. No hay servidor, emisión de desafíos, almacenamiento seguro de credenciales, verificación criptográfica ni autenticación verdadera. «Confirmar passkey» únicamente avanza una secuencia de navegación; **no registra una llave real ni invoca un autenticador del sistema**. El código TOTP `482915` es fijo. Para llevarlos a producción hacen falta un servicio de identidad con verificación del lado del servidor, un flujo de inscripción y recuperación seguro, y revisión de Seguridad.
+La interfaz permite recorrer alta e ingreso con passkey y TOTP, pero **NO implementa WebAuthn ni genera/valida códigos TOTP reales**. No hay servidor, emisión de desafíos, almacenamiento seguro de credenciales, verificación criptográfica ni autenticación verdadera. «Confirmar passkey» únicamente avanza una secuencia de navegación; la pantalla de comprobación adicional de titularidad también es ilustrativa; **no registra una llave real ni invoca un autenticador del sistema**. El código TOTP `482915` es fijo. Para llevarlos a producción hacen falta un servicio de identidad con verificación del lado del servidor, un flujo de inscripción y recuperación seguro, y revisión de Seguridad.
 
 No captures contraseñas, datos bancarios ni información personal real en el prototipo. Los estados de inicio, facturación y permisos solo se modifican en memoria; ninguna acción altera cuentas Nubox.
 
