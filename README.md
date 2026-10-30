@@ -20,16 +20,38 @@ Abrir `index.html` en cualquier navegador moderno. No necesita backend ni creden
 
 Cuando están configurados TOTP y passkey, ambos permanecen disponibles, sin exigirlos juntos en el ingreso normal. La exención del segundo factor por un dispositivo de confianza **no está habilitada**.
 
-## Cómo comprobar los estados
+## Simulador: cuatro estados de transición aprobados
 
-- **Ingreso sin MFA obligatorio:** abrir [el prototipo normal](https://loncodev.github.io/nubox-platform-demo/) → RUT → ingresar → plataforma.
-- **MFA obligatorio:** abrir [el escenario con MFA obligatorio](https://loncodev.github.io/nubox-platform-demo/?escenario=mfa-obligatorio) → RUT → ingresar → elegir TOTP o passkey.
-- **Registrar TOTP voluntariamente:** ingresar con RUT en el escenario normal → Seguridad → Configurar TOTP.
-- **Añadir passkey conservando TOTP:** registrar TOTP → cerrar sesión → ingresar con RUT + TOTP → Seguridad → Configurar passkey. Se exige revalidar el factor antes de registrar un método adicional.
-- **Ingreso con Google:** opción Google → continuar. Se representa la navegación, no OAuth.
-- **Código fijo TOTP del prototipo:** `482915`.
+En la franja superior, separada de las pantallas reales del cliente, se puede seleccionar:
 
-El estado solo existe en memoria: **recargar la página reinicia las credenciales ficticias**. El parámetro `escenario=mfa-obligatorio` modifica únicamente el comportamiento ilustrativo del prototipo, no una política ni un usuario real.
+| Estado de cuenta | Recorrido de prueba | Tenant/productos mostrados |
+| --- | --- | --- |
+| **Sin migrar** | RUT + contraseña existente → selector de tenants | Ejemplo multiproducto: Tenant 1 (CO, RE), Tenant 2 (FA), Tenant 3 (CO) |
+| **Primera activación** | RUT + contraseña → escoger TOTP o passkey → comprobación adicional simulada → activación → selector de tenants | Piloto con acceso exclusivamente a Contabilidad en dos tenants |
+| **MFA activo** | Passkey o RUT + contraseña + TOTP → selector de tenants | Piloto solo CO, factores ya registrados |
+| **Recuperación** | Método alternativo ya registrado (passkey o TOTP), o ayuda asistida | Piloto solo CO, sin permitir acceso solamente con contraseña |
+
+- [Sin migrar](https://loncodev.github.io/nubox-platform-demo/?escenario=no-migrado)
+- [Primera activación](https://loncodev.github.io/nubox-platform-demo/?escenario=pendiente-mfa)
+- [MFA activo](https://loncodev.github.io/nubox-platform-demo/?escenario=mfa-activo)
+- [Recuperación](https://loncodev.github.io/nubox-platform-demo/?escenario=recuperacion)
+
+**Una única pantalla de ingreso real**: los cuatro botones de la franja superior son exclusivamente herramientas de demostración. No existen URLs distintas para usuarios migrados y no migrados.
+
+Tras cada autenticación exitosa, la primera pantalla es **«Selecciona tu empresa y sistema»**, donde se ven simultáneamente los tenants y productos autorizados. Al elegir uno se accede al producto con ese tenant activo. La vista representa la responsabilidad del sistema de Perfilamiento en FA/CO/RE; no se reconstruyen permisos reales.
+
+El código TOTP ilustrativo es `482915`. Para probar el segundo ingreso después de enrolar TOTP, cerrar sesión desde **Seguridad** sin recargar la pestaña. Los estados viven solamente en memoria y una recarga vuelve a cargar los datos ficticios del escenario elegido. El parámetro anterior `escenario=mfa-obligatorio` se interpreta como `pendiente-mfa` para mantener compatibilidad.
+
+## Arquitectura del caso de negocio
+
+- **Objetivo obligatorio:** login único con MFA para FA, CO, RE, Portal de Colaboradores y Control de Asistencia.
+- **Situación declarada en el BC:** cinco logins y cinco bases de usuarios. Esto no equivale necesariamente a cinco URLs ni cinco autenticadores físicamente independientes.
+- **Accesos actuales informados:** tres URLs: una compartida por FA/CO/RE, otra para Portal (administradores y colaboradores) y otra para Asistencia (administradores y colaboradores).
+- **FA/CO/RE:** formulario y servicio de Autenticación compartidos para RUT + contraseña. **Perfilamiento es un sistema diferente** encargado de las relaciones entre usuarios y sistemas. La selección de tenants y productos existe hoy y debe conservarse.
+- **Hipótesis de diseño para Portal y Asistencia:** ambos cuentan con autenticación y autorización independientes.
+- **Arquitectura aprobada:** un servicio central de autenticación con MFA, tres integraciones principales y conservación de las autorizaciones existentes. No se requiere fusionar físicamente todas las bases antes de integrar el acceso.
+- **Piloto:** usuarios que solo tengan acceso a Contabilidad, seguidos por otras cohortes; a medida que se incorporan, el ingreso requiere MFA y no puede retroceder a una vía legada que omita el segundo factor.
+- **Pendiente de Seguridad:** definir el mecanismo real de comprobación de titularidad para el primer enrolamiento; el prototipo solo simula una aprobación.
 
 ## Pruebas de regresión
 
@@ -51,12 +73,10 @@ No captures contraseñas, datos bancarios ni información personal real en el pr
 - Conservar los permisos, empresas y productos existentes, sin intentar enlazar identidades automáticamente por coincidencia de correo.
 - La calidad del correo de contacto es un asunto de datos de contacto, no un cambio obligatorio del identificador de autenticación.
 
-## Hipótesis y validación
+## Hipótesis y validación técnica
 
-Según la información aportada para esta iteración, Nubox ya tiene ingreso por **RUT y Google**, una identidad interna compartida y **Perfilamento** para controlar empresas, productos y permisos. Debe validarse con Ingeniería qué cuentas tienen Google vinculado, cómo se asigna cada credencial a un ID interno, cómo funcionan las sesiones y qué exigencias de MFA aplican.
+Antes de desarrollo productivo debemos validar en Ingeniería la distribución real de las cinco bases de usuarios, la viabilidad de evolución del autenticador de FA/CO/RE, el protocolo de sesiones e integración con Portal/Asistencia, y cómo vincular de forma segura los identificadores sin perder permisos. La coincidencia de RUT o correo no autoriza a fusionar identidades automáticamente.
 
-**No asumimos que el caso de negocio requiera migrar de RUT a correo**. Los datos de contacto desactualizados no justifican convertir el correo en credencial ni fusionar cuentas a partir de una coincidencia de dirección.
+No migramos RUT a correo. El correo sigue siendo un dato de contacto y recuperación, no un factor MFA ni un identificador nuevo obligatorio.
 
-El recorrido de Google es solo interfaz: no implementa OAuth ni autentica una cuenta real. Passkeys y TOTP también son representaciones de interacción; las implementaciones productivas requieren verificación criptográfica en el backend, inscripción segura y recuperación de cuentas.
-
-La validación de la propuesta debe medir cobertura de MFA, satisfacción y éxito de ingreso, bloqueos, tasa de recuperación y tickets de soporte.
+El recorrido de Google es solo interfaz: no implementa OAuth ni autentica una cuenta real. Las garantías de MFA que entrega Google deben validarse antes de confiar en ellas. La validación del proyecto debe medir cobertura de MFA, éxito de ingreso, bloqueos, tiempos de recuperación, permisos y tickets de soporte.
