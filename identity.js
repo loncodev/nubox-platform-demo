@@ -43,7 +43,7 @@ window.NuboxIdentity=function(api){
     aside('Ingreso con passkey','Tu cuenta en un solo paso.','No necesitas escribir correo, RUT ni contraseña.'),
     '<div class="passkey-symbol" aria-hidden="true">◉</div><h2>Ingresar con passkey</h2>'+
     '<p class="lead">Selecciona tu passkey y confirma con tu dispositivo.</p>'+
-    '<div class="panel"><strong>Cuenta Nubox</strong><p>'+escape(state.email)+'</p><small>La comprobación biométrica se representa en este recorrido, sin solicitarla al dispositivo.</small></div>'+
+    '<div class="panel"><strong>Cuenta Nubox</strong><p>Andrés Rojas</p><small>La confirmación con el dispositivo se representa en este recorrido.</small></div>'+
     '<button class="action" data-action="confirmPasskeySignIn">Continuar</button>'+
     '<div class="aux"><button class="linkbtn" data-action="login">Ingresar de otra forma</button></div>'
   )}
