@@ -51,8 +51,8 @@
 <body>
 <div class="prototype-utilities" role="group" aria-label="Selector de escenarios del simulador"><span class="scenario-label">Simulador · estado del usuario</span><button id="scenario-legacy" type="button" aria-pressed="false">Sin migrar</button><button id="scenario-pending" type="button" aria-pressed="false">Primera activación</button><button id="scenario-active" type="button" aria-pressed="false">MFA activo</button><button id="scenario-recovery" type="button" aria-pressed="false">Recuperación</button><button id="reset" type="button" aria-label="Reiniciar recorrido">Reiniciar ↻</button><span id="scenario-detail" aria-live="polite"></span></div>
 <main id="app"></main>
-<script src="extras.js"></script>
-<script src="identity.js?v=2321bfd7"></script>
+<script src="extras.js?v=9b779001"></script>
+<script src="identity.js?v=c7f49033"></script>
 <script>
 (() => {
 'use strict';
@@ -160,7 +160,7 @@ else if(a==='google'){if(state.screen!=='passkeyUnavailable')state.pendingPasske
 else if(a==='googleContinue')setScreen(identity.startGoogleLogin())
 else if(a==='login'){state.pendingPasskeySetup=false;setScreen('login')}
 else if(a==='recover'||a==='noaccess')setScreen('recovery')
-else if(a==='support')toast('Solicitud recibida. Es necesario validar tu identidad antes de recuperar el acceso.')
+else if(a==='support')toast('Simulación: aquí se iniciaría una solicitud de recuperación asistida. No se envió nada.')
 
 
 else if(a==='selectTenantProduct'){const index=Number(el.dataset.index),code=el.dataset.code;const permitted=visibleTenants().some(item=>item.index===index&&item.products.includes(code));if(!permitted){toast('No tienes acceso a este producto en el tenant seleccionado.')}else{state.company=index;state.chosenProduct=code;setScreen('product')}}
